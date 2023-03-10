@@ -1,0 +1,19 @@
+{
+  "name": "pokegpt",
+  "version": "1.0.0",
+  "description": "Let's help ChatGPT play Pokemon lol",
+  "main": "play_pokemon.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tacowhisperer/pokeGPT.git"
+  },
+  "author": "tacowhisperer",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/tacowhisperer/pokeGPT/issues"
+  },
+  "homepage": "https://github.com/tacowhisperer/pokeGPT#readme"
+}
