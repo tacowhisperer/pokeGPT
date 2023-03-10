@@ -78,12 +78,45 @@ function calcNatureMod(stat, nature) {
   }
 
   // Return the nature modifier based on the given stat and nature
-  if (stat === increase) {
+  if (stat.toLowerCase() === increase) {
     return 1.1;
-  } else if (stat === decrease) {
+  } else if (stat.toLowerCase() === decrease) {
     return 0.9;
   } else {
     return 1;
+  }
+}
+
+/**
+ * Maps the full stat name to its abbreviation.
+ * 
+ * @param {string} stat - The stat that will be abbreviated.
+ * @returns {string} The abbreviation of the stat.
+ */
+function abbreviate(stat) {
+  switch (stat.toLowerCase()) {
+    case 'health points':
+    case 'health point':
+    case 'health':
+      return 'hp';
+
+    case 'attack':
+      return 'atk';
+
+    case 'defense':
+      return 'def';
+
+    case 'special attack':
+      return 'sp.atk';
+
+    case 'special defense':
+      return 'sp.def';
+
+    case 'speed':
+      return 'spd';
+
+    default:
+      return stat.toLowerCase();
   }
 }
 
