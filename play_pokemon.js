@@ -1,4 +1,37 @@
 /**
+ * Maps the full stat name to its abbreviation.
+ * 
+ * @param {string} stat - The stat that will be abbreviated.
+ * @returns {string} The abbreviation of the stat.
+ */
+function abbreviate(stat) {
+  switch (stat.toLowerCase()) {
+    case 'health points':
+    case 'health point':
+    case 'health':
+      return 'hp';
+
+    case 'attack':
+      return 'atk';
+
+    case 'defense':
+      return 'def';
+
+    case 'special attack':
+      return 'sp.atk';
+
+    case 'special defense':
+      return 'sp.def';
+
+    case 'speed':
+      return 'spd';
+
+    default:
+      return stat.toLowerCase();
+  }
+}
+
+/**
  * Calculates the HP stat of a Pokémon based on its base, IV, EV, and level.
  *
  * @param {number} base - The base HP stat of the Pokémon.
@@ -78,45 +111,12 @@ function calcNatureMod(stat, nature) {
   }
 
   // Return the nature modifier based on the given stat and nature
-  if (stat.toLowerCase() === increase) {
+  if (stat.toLowerCase() === increase || stat.toLowerCase() === abbreviate(increase)) {
     return 1.1;
-  } else if (stat.toLowerCase() === decrease) {
+  } else if (stat.toLowerCase() === decrease || stat.toLowerCase() === abbreviate(decrease)) {
     return 0.9;
   } else {
     return 1;
-  }
-}
-
-/**
- * Maps the full stat name to its abbreviation.
- * 
- * @param {string} stat - The stat that will be abbreviated.
- * @returns {string} The abbreviation of the stat.
- */
-function abbreviate(stat) {
-  switch (stat.toLowerCase()) {
-    case 'health points':
-    case 'health point':
-    case 'health':
-      return 'hp';
-
-    case 'attack':
-      return 'atk';
-
-    case 'defense':
-      return 'def';
-
-    case 'special attack':
-      return 'sp.atk';
-
-    case 'special defense':
-      return 'sp.def';
-
-    case 'speed':
-      return 'spd';
-
-    default:
-      return stat.toLowerCase();
   }
 }
 
@@ -337,7 +337,7 @@ function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, wea
   }
 
   if (critical > 1) {
-
+    // TODO: Implement critical hit calculation
   }
 
   damage *= critical * doubleDmg * charge * hh * stab * type;
