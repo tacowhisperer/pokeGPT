@@ -129,8 +129,46 @@ function abbreviate(stat) {
  * @returns {number} The corresponding multiplier for the stat.
  */
 function calcStatStageMod(stat, stage, gen = 3) {
-  if (stage < -6 or stage > 6) {
+  // Stages and generations only exist in integer values.
+  stage = Math.floor(stage);
+  gen = Math.floor(gen);
+
+  if (stage < -6 || stage > 6) {
     throw new Error("A stat can only be lowered 6 stages or raised 6 stages.");
+  }
+
+  // Gen 1 uses an approximated multiplier values
+  if (gen === 1) {
+    switch (stage) {
+      case -6:
+        return 0.25;
+      case -5:
+        return 0.28;
+      case -4:
+        return 0.33;
+      case -3:
+        return 0.4;
+      case -2:
+        return 0.5;
+      case -1:
+        return 0.66;
+      case 0:
+        return 1;
+      case 1:
+        return 1.5;
+      case 2:
+        return 2;
+      case 3:
+        return 2.5;
+      case 4:
+        return 3;
+      case 5:
+        return 3.5;
+      case 6:
+        return 4;
+      default:
+        throw new Error(`Impossible stage reached. Got ${stage}.`);
+    }
   }
 
   switch (stat.toLowerCase()) {
@@ -139,41 +177,82 @@ function calcStatStageMod(stat, stage, gen = 3) {
       if (gen >= 5) {
         return (3 + Math.max(0, stage)) / (3 - Math.min(0, stage));
       } else if (gen >= 2 && gen <= 4) {
-        // TODO: Implement the approximated multipliers here
+        // Gens II - IV use approximated multiplier values.
+        switch (stage) {
+          case -6:
+            return 0.33;
+          case -5:
+            return 0.36;
+          case -4:
+            return 0.43;
+          case -3:
+            return 0.5;
+          case -2:
+            return 0.6;
+          case -1:
+            return 0.75;
+          case 0:
+            return 1;
+          case 1:
+            return 1.33;
+          case 2:
+            return 1.66;
+          case 3:
+            return 2;
+          case 4:
+            return gen === 2 ? 2.33 : 2.5;
+          case 5:
+            return 2.66;
+          case 6:
+            return 3;
+          default:
+            throw new Error(`Impossible stage reached. Got ${stage}.`);
+        }
       }
       break;
 
     case "eva":
+    case "evsn":
     case "evasion":
       if (gen >= 5) {
         return (3 - Math.min(0, stage)) / (3 + Math.max(0, stage));
       } else if (gen >= 2 && gen <= 4) {
-        // TODO: Implement the approximated multipliers here
+        // Gens II - IV use approximated mutiplier values.
+        switch (stage) {
+          case -6:
+            return 3;
+          case -5:
+            return 2.66;
+          case -4:
+            return gen === 2 ? 2.33 : 2.5;
+          case -3:
+            return 2;
+          case -2:
+            return 1.66;
+          case -1:
+            return 1.33;
+          case 0:
+            return 1;
+          case 1:
+            return 0.75;
+          case 2:
+            return 0.6;
+          case 3:
+            return 0.5;
+          case 4:
+            return 0.43;
+          case 5:
+            return 0.36;
+          case 6:
+            return 0.33;
+          default:
+            throw new Error(`Impossible stage reached. Got ${stage}.`);
+        }
       }
       break;
 
     default:
       return (2 + Math.max(0, stage)) / (2 - Math.min(0, stage));
-  }
-
-  if (isAccOrEvasion) {
-    switch (stage) {
-      case -6:
-      case -5:
-      case -4:
-      case -3:
-      case -2:
-      case -1:
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      default:
-        throw new Error("A stage can only exist in integer values.");
-    }
   }
 }
 
