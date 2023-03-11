@@ -296,11 +296,12 @@ function calcTypeMod(attackerType, defenderType) {
 /**
  * Calculates the damage of a move in Generation III of the Pokémon games.
  * @param {number} level - The level of the attacking Pokémon.
- * @param {number} a - The effective Attack stat of the attacking Pokémon, or the base Attack of the Pokémon performing Beat Up. Negative stat changes
- *                     are ignored if this is a critical hit.
- * @param {number} d - The effective Defense stat of the target, or the base Defense of the target for Beat Up.
- * @param {number} as - The multiplier for the attack stat based on stat changes made during battle.
- * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle.
+ * @param {number} a - The base Attack stat of the attacking Pokémon.
+ * @param {number} d - The base Defense stat of the target, or the base Defense of the target for Beat Up.
+ * @param {number} as - The multiplier for the attack stat based on stat changes made during battle. Ignored for Beat Up. Multipliers < 1 are treated as 1
+ *                      if this is a critical hit.
+ * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle. Ignored for Beat Up. Multipliers > 1 are treated as 1
+ *                      if this is a critical hit.
  * @param {number} power - The effective power of the used move.
  * @param {number} burn - 0.5 if the attacker is burned, 1 otherwise.
  * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double Battle. 1 if critical hit
@@ -325,22 +326,16 @@ function calcTypeMod(attackerType, defenderType) {
  * @param {number} hh - 1.5 if the attacker's ally used Helping Hand, 1 otherwise.
  * @param {number} stab - Same-Type Attack Bonus. 1 if the move's type doesn't match one of the user's types, 1.5 otherwise.
  * @param {number} type - The type effectiveness. Can be 0.25, 0.5, 1, 2, or 4.
- * @param {boolean} spitUp - True if the move is Spit Up, false otherwise.
+ * @param {number} random - The random factor that affects how much final damage is done. Varies from [0.85 to 1] rounded down.
+ * @param {boolean} ignoreCrit - True if critical should be ignored, false otherwise.
+ * @param {boolean} ignoreRandom - True if the random factor should be ignored, false otherwise.
  * @returns {number} - The calculated damage.
  */
-function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical, doubleDmg, charge, hh, stab, type, spitUp) {
-  let damage = (((2 * level / 5) + 2) * power * a / d / 50) * burn * screen * targets * weather * ff + 2;
+function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical, doubleDmg, charge, hh, stab, type, random, ignoreCrit, ignoreRandom) {
+  // Stat changes to the attack/defense stat are ignored if they negatively affect the attacker.
+  const critMod = (xs, cmp = v => v < 1) => !ignoreCrit && critical > 1 && cmp(xs) ? 1 : xs;
 
-  // Spit Up has no random factor nor critical hit multiplier greater than 1.
-  if (spitUp) {
-    return damage * stockpile * hh * stab * type;
-  }
-
-  if (critical > 1) {
-    // TODO: Implement critical hit calculation
-  }
-
-  damage *= critical * doubleDmg * charge * hh * stab * type;
-
-  return damage * Math.floor(Math.random() * (100 - 85 + 1) + 85) / 100;;
+  let initDamage = (((2 * level / 5) + 2) * power * (a * critMod(as)) / (d * critMod(ds, v => v > 1)) / 50) * burn * (!ignoreCrit && critical > 1 ? 1 : screen) * targets * weather * ff + 2;
+  
+  return initDamage * stockpile * (ignoreCrit ? 1 : critical) * doubleDmg * charge * hh * stab * type * (ignoreRandom ? 1 : random);
 }
