@@ -121,6 +121,63 @@ function abbreviate(stat) {
 }
 
 /**
+ * Calculates the multiplier for the number of stages a stat has been raised or lowered.
+ * 
+ * @param {string} stat - The stat being modified.
+ * @param {number} stage - An integer [-6, 6] that denotes the stages that the stat has been modified.
+ * @param {number} gen=3 - The Pokémon generation that the stat change took place.
+ * @returns {number} The corresponding multiplier for the stat.
+ */
+function calcStatStageMod(stat, stage, gen = 3) {
+  if (stage < -6 or stage > 6) {
+    throw new Error("A stat can only be lowered 6 stages or raised 6 stages.");
+  }
+
+  switch (stat.toLowerCase()) {
+    case "acc":
+    case "accuracy":
+      if (gen >= 5) {
+        return (3 + Math.max(0, stage)) / (3 - Math.min(0, stage));
+      } else if (gen >= 2 && gen <= 4) {
+        // TODO: Implement the approximated multipliers here
+      }
+      break;
+
+    case "eva":
+    case "evasion":
+      if (gen >= 5) {
+        return (3 - Math.min(0, stage)) / (3 + Math.max(0, stage));
+      } else if (gen >= 2 && gen <= 4) {
+        // TODO: Implement the approximated multipliers here
+      }
+      break;
+
+    default:
+      return (2 + Math.max(0, stage)) / (2 - Math.min(0, stage));
+  }
+
+  if (isAccOrEvasion) {
+    switch (stage) {
+      case -6:
+      case -5:
+      case -4:
+      case -3:
+      case -2:
+      case -1:
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      default:
+        throw new Error("A stage can only exist in integer values.");
+    }
+  }
+}
+
+/**
  * Calculates the type effectiveness of a Pokémon's attack against a defender's type.
  *
  * @param {string} attackerType - The type of the Pokémon using the attack.
@@ -160,8 +217,11 @@ function calcTypeMod(attackerType, defenderType) {
 /**
  * Calculates the damage of a move in Generation III of the Pokémon games.
  * @param {number} level - The level of the attacking Pokémon.
- * @param {number} a - The effective Attack stat of the attacking Pokémon, or the base Attack of the Pokémon performing Beat Up.
+ * @param {number} a - The effective Attack stat of the attacking Pokémon, or the base Attack of the Pokémon performing Beat Up. Negative stat changes
+ *                     are ignored if this is a critical hit.
  * @param {number} d - The effective Defense stat of the target, or the base Defense of the target for Beat Up.
+ * @param {number} as - The multiplier for the attack stat based on stat changes made during battle.
+ * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle.
  * @param {number} power - The effective power of the used move.
  * @param {number} burn - 0.5 if the attacker is burned, 1 otherwise.
  * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double Battle. 1 if critical hit
@@ -189,10 +249,10 @@ function calcTypeMod(attackerType, defenderType) {
  * @param {boolean} spitUp - True if the move is Spit Up, false otherwise.
  * @returns {number} - The calculated damage.
  */
-
-function calcGenIIIDamage(level, a, d, power, burn, screen, targets, weather, ff, stockpile, critical, doubleDmg, charge, hh, stab, type, spitUp) {
+function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical, doubleDmg, charge, hh, stab, type, spitUp) {
   let damage = (((2 * level / 5) + 2) * power * a / d / 50) * burn * screen * targets * weather * ff + 2;
 
+  // Spit Up has no random factor nor critical hit multiplier greater than 1.
   if (spitUp) {
     return damage * stockpile * hh * stab * type;
   }
