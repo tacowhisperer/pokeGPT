@@ -164,12 +164,14 @@ function calcTypeMod(attackerType, defenderType) {
  * @param {number} d - The effective Defense stat of the target, or the base Defense of the target for Beat Up.
  * @param {number} power - The effective power of the used move.
  * @param {number} burn - 0.5 if the attacker is burned, 1 otherwise.
- * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double Battle.
+ * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double Battle. 1 if critical hit
  * @param {number} targets - 0.5 in Double Battles if the move targets both foes, 1 otherwise.
  * @param {number} weather - 0.5, 1, or 1.5 depending on the weather and the presence of Cloud Nine/Air Lock.
  * @param {number} ff - 1.5 if the attacker has Flash Fire and the move is Fire-type, 1 otherwise.
  * @param {number} stockpile - 1, 2, or 3 depending on Stockpiles done for Spit Up, 1 otherwise.
- * @param {number} critical - 2 for a critical hit, 1 otherwise.
+ * @param {number} critical - 2 for a critical hit, 1 otherwise. Always 1 if Future Sight, Doom Desire, Spit Up, or if the target has the abilities:
+ *                          - Battle Armor
+ *                          - Shell Armor
  * @param {number} doubleDmg - 2 if the used move is one of the following moves and conditions apply, 1 otherwise:
  *                           - Gust or Twister and the target is in the semi-invulnerable turn of Fly or Bounce.
  *                           - Stomp, Needle Arm, Astonish, or Extrasensory and the target has previously used Minimize.
@@ -193,6 +195,10 @@ function calcGenIIIDamage(level, a, d, power, burn, screen, targets, weather, ff
 
   if (spitUp) {
     return damage * stockpile * hh * stab * type;
+  }
+
+  if (critical > 1) {
+
   }
 
   damage *= critical * doubleDmg * charge * hh * stab * type;
