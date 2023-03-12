@@ -378,6 +378,8 @@ function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, wea
  * @param {number} eb - 1.2 if the used move is super effective and the attacker is holding an Expert Belt, and 1 otherwise.
  * @param {number} tl - 2 if the used move is not very effective and the attacker's Ability is Tinted Lens, and 1 otherwise.
  * @param {number} berry - A multiplier that applies when a Berry is used. Its value is 0.5, 1, or 2 depending on the type of Berry used.
+ * @param {number} random - The random factor that affects how much final damage is done. Varies from [0.85 to 1]
+ *                          rounded down.
  * @param {boolean} ignoreCrit - True if critical should be ignored, false otherwise.
  * @param {boolean} ignoreRandom - True if the random factor should be ignored, false otherwise.
  * @param {boolean} isSniper - True if the attacker has the ability Sniper, false otherwise.
@@ -385,7 +387,7 @@ function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, wea
  * @returns {number} The amount of damage inflicted by the move.
  */
 function calcGenIVDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, critical, item, first, stab,
-  type1, type2, srf, eb, tl, berry, ignoreCrit, ignoreRandom, isSniper, isAdaptability) {
+  type1, type2, srf, eb, tl, berry, random, ignoreCrit, ignoreRandom, isSniper, isAdaptability) {
   // Stat changes to the attack/defense stat are ignored if they negatively affect the attacker.
   const critMod = (xs, cmp = v => v < 1) => !ignoreCrit && critical > 1 && cmp(xs) ? 1 : xs;
 
@@ -398,9 +400,10 @@ function calcGenIVDamage(level, a, d, as, ds, power, burn, screen, targets, weat
     stab = 2;
   }
 
-  // TODO: Finish adapting this
+  // TODO: Whatever other conditions that go here before the actual damage calculation takes place.
+  // https://bulbapedia.bulbagarden.net/wiki/Damage
 
-  const random = (Math.floor(Math.random() * (100 - 85 + 1)) + 85) / 100;
+
   const typeEffectiveness = type1 * type2;
   const damage = (((((2 * level / 5) + 2) * power * a / d) / 50) * burn * screen * targets * weather * ff + 2) * critical * item * first * random * stab * typeEffectiveness * srf * eb * tl * berry;
   return damage;
