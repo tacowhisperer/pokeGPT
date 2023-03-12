@@ -298,20 +298,22 @@ function calcTypeMod(attackerType, defenderType) {
  * @param {number} level - The level of the attacking Pokémon.
  * @param {number} a - The base Attack stat of the attacking Pokémon.
  * @param {number} d - The base Defense stat of the target, or the base Defense of the target for Beat Up.
- * @param {number} as - The multiplier for the attack stat based on stat changes made during battle. Ignored for Beat Up. Multipliers < 1 are treated as 1
- *                      if this is a critical hit.
- * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle. Ignored for Beat Up. Multipliers > 1 are treated as 1
- *                      if this is a critical hit.
+ * @param {number} as - The multiplier for the attack stat based on stat changes made during battle. Ignored for
+ *                      Beat Up. Multipliers < 1 are treated as 1 if this is a critical hit.
+ * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle. Ignored for
+ *                      Beat Up. Multipliers > 1 are treated as 1 if this is a critical hit.
  * @param {number} power - The effective power of the used move.
  * @param {number} burn - 0.5 if the attacker is burned, 1 otherwise.
- * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double Battle. 1 if critical hit
+ * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double
+ *                          Battle. 1 if critical hit
  * @param {number} targets - 0.5 in Double Battles if the move targets both foes, 1 otherwise.
  * @param {number} weather - 0.5, 1, or 1.5 depending on the weather and the presence of Cloud Nine/Air Lock.
  * @param {number} ff - 1.5 if the attacker has Flash Fire and the move is Fire-type, 1 otherwise.
  * @param {number} stockpile - 1, 2, or 3 depending on Stockpiles done for Spit Up, 1 otherwise.
- * @param {number} critical - 2 for a critical hit, 1 otherwise. Always 1 if Future Sight, Doom Desire, Spit Up, or if the target has the abilities:
- *                          - Battle Armor
- *                          - Shell Armor
+ * @param {number} critical - 2 for a critical hit, 1 otherwise. Always 1 if Future Sight, Doom Desire, Spit Up, or if
+ *                            the target has the abilities:
+ *                              - Battle Armor
+ *                              - Shell Armor
  * @param {number} doubleDmg - 2 if the used move is one of the following moves and conditions apply, 1 otherwise:
  *                           - Gust or Twister and the target is in the semi-invulnerable turn of Fly or Bounce.
  *                           - Stomp, Needle Arm, Astonish, or Extrasensory and the target has previously used Minimize.
@@ -321,21 +323,85 @@ function calcTypeMod(attackerType, defenderType) {
  *                           - Facade and the user is poisoned, burned, or paralyzed.
  *                           - SmellingSalt and the target is paralyzed.
  *                           - Revenge and the attacker has been damaged by the target this turn.
- *                           - Weather Ball, there is non-clear weather, and no Pokémon on the field have the Ability Cloud Nine or Air Lock.
+ *                           - Weather Ball, there is non-clear weather, and no Pokémon on the field have the Ability
+ *                             Cloud Nine or Air Lock.
  * @param {number} charge - 2 if the move is Electric-type and Charge takes effect, 1 otherwise.
  * @param {number} hh - 1.5 if the attacker's ally used Helping Hand, 1 otherwise.
- * @param {number} stab - Same-Type Attack Bonus. 1 if the move's type doesn't match one of the user's types, 1.5 otherwise.
- * @param {number} type - The type effectiveness. Can be 0.25, 0.5, 1, 2, or 4.
- * @param {number} random - The random factor that affects how much final damage is done. Varies from [0.85 to 1] rounded down.
+ * @param {number} stab - Same-Type Attack Bonus. 1 if the move's type doesn't match one of the user's types, 1.5
+ *                        otherwise.
+ * @param {number} type - The type effectiveness. Can be 0.25, 0.5, 1, 2, or 4. Struggle, Future Sight, Doom Desire, and
+ *                        Beat Up are always 1.
+ * @param {number} random - The random factor that affects how much final damage is done. Varies from [0.85 to 1]
+ *                          rounded down.
  * @param {boolean} ignoreCrit - True if critical should be ignored, false otherwise.
  * @param {boolean} ignoreRandom - True if the random factor should be ignored, false otherwise.
  * @returns {number} - The calculated damage.
  */
-function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical, doubleDmg, charge, hh, stab, type, random, ignoreCrit, ignoreRandom) {
+function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical,
+  doubleDmg, charge, hh, stab, type, random, ignoreCrit, ignoreRandom) {
   // Stat changes to the attack/defense stat are ignored if they negatively affect the attacker.
   const critMod = (xs, cmp = v => v < 1) => !ignoreCrit && critical > 1 && cmp(xs) ? 1 : xs;
 
-  let initDamage = (((2 * level / 5) + 2) * power * (a * critMod(as)) / (d * critMod(ds, v => v > 1)) / 50) * burn * (!ignoreCrit && critical > 1 ? 1 : screen) * targets * weather * ff + 2;
+  let initDamage = (((2 * level / 5) + 2) * power * (a * critMod(as)) / (d * critMod(ds, v => v > 1)) / 50) *
+    burn * (!ignoreCrit && critical > 1 ? 1 : screen) * targets * weather * ff + 2;
   
   return initDamage * stockpile * (ignoreCrit ? 1 : critical) * doubleDmg * charge * hh * stab * type * (ignoreRandom ? 1 : random);
+}
+
+/**
+ * Calculates the damage inflicted by a move in the fourth generation of Pokémon games.
+ * @param {number} level - The level of the attacking Pokémon.
+ * @param {number} a - The effective Attack stat of the attacking Pokémon if the used move is physical, or the effective Special Attack stat of the attacking Pokémon if the used move is special.
+ * @param {number} d - The effective Defense stat of the target if the used move is physical, or the effective Special Defense stat of the target if the used move is special.
+ * @param {number} as - The multiplier for the attack stat based on stat changes made during battle. Ignored for Beat Up. Multipliers < 1 are treated as 1
+ *                      if this is a critical hit.
+ * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle. Ignored for Beat Up. Multipliers > 1 are treated as 1
+ *                      if this is a critical hit.
+ * @param {number} power - The effective power of the used move.
+ * @param {number} burn - 0.5 if the attacker is burned, its Ability is not Guts, and the used move is a physical move, and 1 otherwise.
+ * @param {number} screen - 0.5 if the used move is physical and Reflect is present on the target's side of the field, or special and Light Screen is present. For a Double Battle, Screen is instead 2/3. Screen is 1 otherwise or if the used move lands a critical hit.
+ * @param {number} targets - 0.75 in Double Battles if the used move has more than one target, and 1 otherwise.
+ * @param {number} weather - 1.5 if a Water-type move is being used during rain or a Fire-type move during harsh sunlight, and 0.5 if a Water-type move is used during harsh sunlight or a Fire-type move during rain, or SolarBeam during any non-clear weather besides harsh sunlight, and 1 otherwise or if any Pokémon on the field have the Ability Cloud Nine or Air Lock.
+ * @param {number} ff - 1.5 if the used move is Fire-type and the attacker's Ability is Flash Fire that has been activated by a Fire-type move, and 1 otherwise.
+ * @param {number} critical - 2 for a critical hit, 3 if the move lands a critical hit and the attacker's Ability is
+ *                            Sniper, 1 if the target is under the effect of Lucky Chant, and 1 otherwise. Always 1 if
+ *                            the used move is Future Sight, Doom Desire, Spit Up, or if the target has the abilities:
+ *                              - Battle Armor
+ *                              - Shell Armor
+ * @param {number} item - 1.3 if the attacker is holding a Life Orb, 1 + (n / 10) if the attacker is holding a Metronome, where n is the amount of times the same move has been successfully and consecutively used, up to 10, and 1 otherwise.
+ * @param {number} first - 1.5 if the used move was stolen with Me First, and 1 otherwise.
+ * @param {number} stab - Same-Type Attack Bonus. 1 if the move's type doesn't match one of the user's types, 1.5
+ *                        otherwise.
+ * @param {number} type1 - The type effectiveness of the used move against the target's first type (or only type, if it only has a single type).
+ * @param {number} type2 - The type effectiveness of the used move against the target's second type. If the target only has a single type, Type2 is 1.
+ * @param {number} srf - 0.75 if the used move is super effective, the target's Ability is Solid Rock or Filter, and the attacker's Ability is not Mold Breaker, and 1 otherwise.
+ * @param {number} eb - 1.2 if the used move is super effective and the attacker is holding an Expert Belt, and 1 otherwise.
+ * @param {number} tl - 2 if the used move is not very effective and the attacker's Ability is Tinted Lens, and 1 otherwise.
+ * @param {number} berry - A multiplier that applies when a Berry is used. Its value is 0.5, 1, or 2 depending on the type of Berry used.
+ * @param {boolean} ignoreCrit - True if critical should be ignored, false otherwise.
+ * @param {boolean} ignoreRandom - True if the random factor should be ignored, false otherwise.
+ * @param {boolean} isSniper - True if the attacker has the ability Sniper, false otherwise.
+ * @param {boolean} isAdaptability - True if the attacker has Adaptability, false otherwise.
+ * @returns {number} The amount of damage inflicted by the move.
+ */
+function calcGenIVDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, critical, item, first, stab,
+  type1, type2, srf, eb, tl, berry, ignoreCrit, ignoreRandom, isSniper, isAdaptability) {
+  // Stat changes to the attack/defense stat are ignored if they negatively affect the attacker.
+  const critMod = (xs, cmp = v => v < 1) => !ignoreCrit && critical > 1 && cmp(xs) ? 1 : xs;
+
+  // Sniper has a crit rate of 3 rather than 2
+  if (isSniper && critical > 1) {
+    critical = 3;
+
+  // STAB for attackers with Adaptability is 2 rather than 1.5
+  } else if (isAdaptability && stab > 1) {
+    stab = 2;
+  }
+
+  // TODO: Finish adapting this
+
+  const random = (Math.floor(Math.random() * (100 - 85 + 1)) + 85) / 100;
+  const typeEffectiveness = type1 * type2;
+  const damage = (((((2 * level / 5) + 2) * power * a / d) / 50) * burn * screen * targets * weather * ff + 2) * critical * item * first * random * stab * typeEffectiveness * srf * eb * tl * berry;
+  return damage;
 }
