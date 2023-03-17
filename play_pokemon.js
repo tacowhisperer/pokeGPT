@@ -303,7 +303,6 @@ function calcTypeMod(attackerType, defenderType) {
  * @param {number} ds - The multiplier for the defense stat based on stat changes made during battle. Ignored for
  *                      Beat Up. Multipliers > 1 are treated as 1 if this is a critical hit.
  * @param {number} power - The effective power of the used move.
- * @param {number} burn - 0.5 if the attacker is burned, 1 otherwise.
  * @param {number} screen - 0.5, 2/3, or 1 depending on the presence of Reflect/Light Screen and whether it's a Double
  *                          Battle. 1 if critical hit
  * @param {number} targets - 0.5 in Double Battles if the move targets both foes, 1 otherwise.
@@ -333,14 +332,17 @@ function calcTypeMod(attackerType, defenderType) {
  *                        Beat Up are always 1.
  * @param {number} random - The random factor that affects how much final damage is done. Varies from [0.85 to 1]
  *                          rounded down.
+ * @param {boolean} isBurned - True if the attacker is burned, false otherwise.
  * @param {boolean} ignoreCrit - True if critical should be ignored, false otherwise.
  * @param {boolean} ignoreRandom - True if the random factor should be ignored, false otherwise.
  * @returns {number} - The calculated damage.
  */
-function calcGenIIIDamage(level, a, d, as, ds, power, burn, screen, targets, weather, ff, stockpile, critical,
-  doubleDmg, charge, hh, stab, type, random, ignoreCrit, ignoreRandom) {
+function calcGenIIIDamage(level, a, d, as, ds, power, screen, targets, weather, ff, stockpile, critical,
+  doubleDmg, charge, hh, stab, type, random, isBurned, ignoreCrit, ignoreRandom) {
   // Stat changes to the attack/defense stat are ignored if they negatively affect the attacker.
   const critMod = (xs, cmp = v => v < 1) => !ignoreCrit && critical > 1 && cmp(xs) ? 1 : xs;
+
+  let burn = isBurned ? 0.5 : 1;
 
   let initDamage = (((2 * level / 5) + 2) * power * (a * critMod(as)) / (d * critMod(ds, v => v > 1)) / 50) *
     burn * (!ignoreCrit && critical > 1 ? 1 : screen) * targets * weather * ff + 2;
