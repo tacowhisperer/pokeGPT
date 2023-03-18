@@ -634,7 +634,7 @@
   "Oshawott": { "pkdxNum": 501, "abilities": ["Torrent", "Shell Armor"] },
   "Dewott": { "pkdxNum": 502, "abilities": ["Torrent", "Shell Armor"] },
   "Samurott": { "pkdxNum": 503, "abilities": ["Torrent", "Shell Armor"] },
-  "Hisuian Samurott": { "pkdxNum": 503, "abilities": ["Torrent", "8: Shell Armor": "9+: Sharpness"] },
+  "Hisuian Samurott": { "pkdxNum": 503, "abilities": ["Torrent", "8: Shell Armor", "9+: Sharpness"] },
   "Patrat": { "pkdxNum": 504, "abilities": ["Run Away", "Keen Eye", "Analytic"] },
   "Watchog": { "pkdxNum": 505, "abilities": ["Illuminate", "Keen Eye", "Analytic"] },
   "Lillipup": { "pkdxNum": 506, "abilities": ["Vital Spirit", "Pickup", "Run Away"] },
