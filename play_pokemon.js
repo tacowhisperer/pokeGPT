@@ -24,7 +24,7 @@ function abbreviate(stat) {
       return 'sp.def';
 
     case 'speed':
-      return 'spd';
+      return 'spe';
 
     default:
       return stat.toLowerCase();
