@@ -350,6 +350,10 @@ function calcGenIIIDamage(level, a, d, as, ds, power, screen, targets, weather, 
   return initDamage * stockpile * (ignoreCrit ? 1 : critical) * doubleDmg * charge * hh * stab * type * (ignoreRandom ? 1 : random);
 }
 
+function calcGenIIIDamage({level = 1, a = 1, d = 1, as = 0, ds = 0, move = "Struggle", power = 50, reflect = false, lightScreen = false, isDoubleBattle = false, targets = 1, weather = "None", ffActive = false, stockpile = 1, crit = false, meetsDoubleDmg = false, isCharged = false, hasHH = false, attackerTypes = [], defenderTypes = [], moveType = "Typeless", random = 1, isBurned = false} = {}) {
+
+}
+
 /**
  * Calculates the damage inflicted by a move in the fourth generation of Pokémon games.
  * @param {number} level - The level of the attacking Pokémon.
