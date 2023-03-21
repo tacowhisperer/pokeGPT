@@ -1,4 +1,94 @@
 /**
+ * A global counter used for generating unique IDs for each type.
+ * @type {number}
+ */
+let __static__ = 0;
+
+/**
+ * Represents a Pokemon type.
+ * @class
+ */
+function Type() {
+  /**
+   * The unique ID of the type.
+   * @private
+   * @type {number}
+   */
+  const _id = __static__++;
+
+  /**
+   * A mapping of effectiveness values for each type against this type.
+   * @private
+   * @type {Object.<string, Object.<string, number>>}
+   */
+  const _effectiveness = {
+    Type.BUG: { Type.FIGHTING: 0.5, Type.FLYING: 2, Type.GROUND: 0.5, Type.ROCK: 2, Type.FIRE: 2, Type.GRASS: 0.5 },
+    Type.DARK: { Type.FIGHTING: 2, Type.PSYCHIC: 0, Type.BUG: 2, Type.GHOST: 0.5, Type.DARK: 0.5, Type.FAIRY: 2 },
+    Type.DRAGON: { Type.FIRE: 0.5, Type.WATER: 0.5, Type.ELECTRIC: 0.5, Type.GRASS: 0.5, Type.ICE: 2, Type.DRAGON: 2, Type.FAIRY: 2 },
+    Type.ELECTRIC: { Type.FLYING: 0.5, Type.GROUND: 2, Type.ELECTRIC: 0.5, Type.DRAGON: 0.5, Type.STEEL: 0.5 },
+    Type.FAIRY: { Type.FIGHTING: 0.5, Type.POISON: 2, Type.BUG: 0.5, Type.DRAGON: 0, Type.DARK: 0.5, Type.STEEL: 2 },
+    Type.FIGHTING: { Type.FLYING: 2, Type.ROCK: 0.5, Type.BUG: 0.5, Type.PSYCHIC: 2, Type.DARK: 0.5, Type.FAIRY: 2 },
+    Type.FIRE: { Type.ROCK: 2, Type.BUG: 0.5, Type.STEEL: 0.5, Type.FIRE: 0.5, Type.WATER: 2, Type.GRASS: 0.5, Type.ICE: 0.5, Type.DRAGON: 0.5, Type.GROUND: 2, Type.FAIRY: 0.5 },
+    Type.FLYING: { Type.FIGHTING: 0.5, Type.ROCK: 2, Type.BUG: 0.5, Type.GRASS: 0.5, Type.ELECTRIC: 2, Type.ICE: 2, Type.GROUND: 0 },
+    Type.GHOST: { Type.NORMAL: 0, Type.FIGHTING: 0, Type.POISON: 0.5, Type.BUG: 0.5, Type.GHOST: 2, Type.DARK: 2 },
+    Type.GRASS: { Type.FLYING: 2, Type.POISON: 2, Type.GROUND: 0.5, Type.BUG: 2, Type.FIRE: 2, Type.GRASS: 0.5, Type.WATER: 0.5, Type.ELECTRIC: 0.5, Type.ICE: 2 },
+    Type.GROUND: { Type.POISON: 0.5, Type.ROCK: 2, Type.WATER: 2, Type.GRASS: 0.5, Type.ELECTRIC: 0, Type.ICE: 2 },
+    Type.ICE: { Type.STEEL: 2, Type.FIRE: 2, Type.ICE: 0.5, Type.ROCK: 2, Type.FIGHTING: 2 },
+    Type.NORMAL: { Type.FIGHTING: 2, Type.GHOST: 0 },
+    Type.POISON: { Type.FIGHTING: 0.5, Type.POISON: 0.5, Type.GROUND: 2, Type.BUG: 0.5, Type.GRASS: 0.5, Type.FAIRY: 0.5, Type.PSYCHIC: 2 },
+    Type.PSYCHIC: { Type.FIGHTING: 0.5, Type.PSYCHIC: 0.5, Type.DARK: 2, Type.GHOST: 2, Type.BUG: 2 },
+    Type.ROCK: { Type.NORMAL: 0.5, Type.FIGHTING: 2, Type.FLYING: 0.5, Type.POISON: 0.5, Type.GROUND: 2, Type.STEEL: 2, Type.FIRE: 0.5, Type.WATER: 2, Type.GRASS: 2 },
+    Type.STEEL: { Type.NORMAL: 0.5, Type.FIGHTING: 2, Type.FLYING: 0.5, Type.ROCK: 0.5, Type.BUG: 0.5, Type.STEEL: 0.5, Type.FIRE: 2, Type.GRASS: 0.5, Type.ICE: 0.5, Type.FAIRY: 0.5, Type.POISON: 0, Type.GROUND: 2, Type.PSYCHIC: 0.5, Type.DRAGON: 0.5 },
+    Type.WATER: { Type.FIRE: 0.5, Type.WATER: 0.5, Type.GRASS: 2, Type.ELECTRIC: 2, Type.ICE: 0.5, Type.STEEL: 0.5 }
+  };
+
+  this.attack = function(fDefenderType, sDefenderType = Type.TYPELESS) {
+    if (!(fDefenderType instanceof Type) || !(sDefenderType instanceof Type))
+      throw new TypeError("Arguments must be instances of Type");
+
+    let mod = 1;
+    if (_effectiveness.hasOwnProperty(fDefenderType) && _effectiveness[fDefenderType].hasOwnProperty[this]) {
+      mod *= _effectiveness[fDefenderType][this];
+    }
+
+    if (_effectiveness.hasOwnProperty(sDefenderType) && _effectiveness[sDefenderType].hasOwnProperty[this]) {
+      mod *= _effectiveness[sDefenderType][this];
+    }
+
+    return mod;
+  };
+
+  this.toString = function() {
+    return `${_id}`;
+  };
+}
+
+// All valid known types
+Type.TYPELESS = new Type();
+Type.BUG = new Type();
+Type.DARK = new Type();
+Type.DRAGON = new Type();
+Type.ELECTRIC = new Type();
+Type.FAIRY = new Type();
+Type.FIGHTING = new Type();
+Type.FIRE = new Type();
+Type.FLYING = new Type();
+Type.GHOST = new Type();
+Type.GRASS = new Type();
+Type.GROUND = new Type();
+Type.ICE = new Type();
+Type.NORMAL = new Type();
+Type.POISON = new Type();
+Type.PSYCHIC = new Type();
+Type.ROCK = new Type();
+Type.STEEL = new Type();
+Type.WATER = new Type();
+
+function Weather() {
+
+}
+
+/**
  * Maps the full stat name to its abbreviation.
  * 
  * @param {string} stat - The stat that will be abbreviated.
