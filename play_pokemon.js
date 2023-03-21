@@ -88,6 +88,18 @@ function Weather() {
 
 }
 
+// All valid known weathers
+Weather.NONE = new Weather();
+Weather.HARSH_SUN = new Weather();
+Weather.RAIN = new Weather();
+Weather.SANDSTORM = new Weather();
+Weather.HAIL = new Weather();
+Weather.SNOW = new Weather();
+Weather.FOG = new Weather();
+Weather.EXTREMELY_HARSH_SUN = new Weather();
+Weather.HEAVY_RAIN = new Weather();
+Weather.STRONG_WINDS = new Weather();
+
 /**
  * Maps the full stat name to its abbreviation.
  * 
