@@ -1,8 +1,46 @@
+const readline = require('readline');
+const pokedex = JSON.parse(require('fs').readFileSync('m_pokedex.json'));
+
 /**
  * A global counter used for generating unique IDs for static instances of Objects.
  * @type {number}
  */
 let __static__ = 0;
+
+/**
+ * Represents a static instance of a weather condition in Pokemon games.
+ * The weather is determined by a predefined set of global variables.
+ *
+ * @class
+ */
+function Weather() {
+  /**
+   * The unique ID of the weather.
+   * @private
+   * @type {number}
+   */
+  const _id = __static__++;
+
+  this.toString = function() {
+    return `${_id}`;
+  };
+}
+
+/**
+ * All observed weathers in Pokemon games, excluding Pokemon XD.
+ * Each weather is instantiated statically as a property of the Weather object.
+ * @class
+ */
+Weather.NONE = new Weather();
+Weather.HARSH_SUN = new Weather();
+Weather.RAIN = new Weather();
+Weather.SANDSTORM = new Weather();
+Weather.HAIL = new Weather();
+Weather.SNOW = new Weather();
+Weather.FOG = new Weather();
+Weather.EXTREMELY_HARSH_SUN = new Weather();
+Weather.HEAVY_RAIN = new Weather();
+Weather.STRONG_WINDS = new Weather();
 
 /**
  * Represents a Pokemon type.
@@ -71,7 +109,7 @@ function Type() {
     return mod;
   };
 
-  this.passThrough = function(weather) {
+  this.attackThrough = function(weather) {
     if (!(weather instanceof Weather))
       throw new TypeError("Weather must in an instance of the Weather function");
 
@@ -112,40 +150,27 @@ Type.WATER = new Type();
 // Flying type during Delta Stream
 Type.DELTA_FLYING = new Type();
 
-/**
- * Represents a static instance of a weather condition in Pokemon games.
- * The weather is determined by a predefined set of global variables.
- *
- * @class
- */
-function Weather() {
-  /**
-   * The unique ID of the weather.
-   * @private
-   * @type {number}
-   */
-  const _id = __static__++;
-
+function Pokemon(name) {
   this.toString = function() {
-    return `${_id}`;
-  };
+    return JSON.stringify(pokedex[name], null, 4);
+  }
 }
 
-/**
- * All observed weathers in Pokemon games, excluding Pokemon XD.
- * Each weather is instantiated statically as a property of the Weather object.
- * @class
- */
-Weather.NONE = new Weather();
-Weather.HARSH_SUN = new Weather();
-Weather.RAIN = new Weather();
-Weather.SANDSTORM = new Weather();
-Weather.HAIL = new Weather();
-Weather.SNOW = new Weather();
-Weather.FOG = new Weather();
-Weather.EXTREMELY_HARSH_SUN = new Weather();
-Weather.HEAVY_RAIN = new Weather();
-Weather.STRONG_WINDS = new Weather();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('Name a Pokemon: ', (pkm) => {
+  if (!pokedex.hasOwnProperty(pkm)) {
+    console.log("This Pokemon doesn't exist.");
+  } else {
+    console.log(`These are the stats for the 'mon you specified:`);
+    console.log((new Pokemon(pkm)).toString());
+  }
+
+  rl.close();
+});
 
 /**
  * Maps the full stat name to its abbreviation.
