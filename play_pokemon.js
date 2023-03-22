@@ -1,5 +1,11 @@
+const fs = require('fs');
 const readline = require('readline');
-const pokedex = JSON.parse(require('fs').readFileSync('m_pokedex.json'));
+
+/**
+ * Contains the base stat, type, and ability data of all available Pokemon up to Gen IX.
+ * @type {Object<string, Object<string, number|Array<string>>>}
+ */
+const pokedex = JSON.parse(fs.readFileSync('m_pokedex.json'));
 
 /**
  * A global counter used for generating unique IDs for static instances of Objects.
@@ -151,8 +157,10 @@ Type.WATER = new Type();
 Type.DELTA_FLYING = new Type();
 
 function Pokemon(name) {
+  this.data = pokedex[name];
+
   this.toString = function() {
-    return JSON.stringify(pokedex[name], null, 4);
+    return JSON.stringify(this.data, null, 4);
   }
 }
 
@@ -161,12 +169,14 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.question('Name a Pokemon: ', (pkm) => {
-  if (!pokedex.hasOwnProperty(pkm)) {
+rl.question('Name a Pokemon: ', (name) => {
+  if (!pokedex.hasOwnProperty(name)) {
     console.log("This Pokemon doesn't exist.");
   } else {
-    console.log(`These are the stats for the 'mon you specified:`);
-    console.log((new Pokemon(pkm)).toString());
+    const pkm = new Pokemon(name);
+    console.log(`These are the stats for "${name}":`);
+    console.log(pkm.toString());
+    console.log(`Internally, "${name}" has Type values of ${pkm.data.types.map(t => `"${Type[t].toString()}"`).join(", and ")}`);
   }
 
   rl.close();
