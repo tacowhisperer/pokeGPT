@@ -1,5 +1,5 @@
 /**
- * A global counter used for generating unique IDs for each type.
+ * A global counter used for generating unique IDs for static instances of Objects.
  * @type {number}
  */
 let __static__ = 0;
@@ -22,40 +22,65 @@ function Type() {
    * @type {Object.<string, Object.<string, number>>}
    */
   const _effectiveness = {
-    Type.BUG: { Type.FIGHTING: 0.5, Type.FLYING: 2, Type.GROUND: 0.5, Type.ROCK: 2, Type.FIRE: 2, Type.GRASS: 0.5 },
-    Type.DARK: { Type.FIGHTING: 2, Type.PSYCHIC: 0, Type.BUG: 2, Type.GHOST: 0.5, Type.DARK: 0.5, Type.FAIRY: 2 },
-    Type.DRAGON: { Type.FIRE: 0.5, Type.WATER: 0.5, Type.ELECTRIC: 0.5, Type.GRASS: 0.5, Type.ICE: 2, Type.DRAGON: 2, Type.FAIRY: 2 },
-    Type.ELECTRIC: { Type.FLYING: 0.5, Type.GROUND: 2, Type.ELECTRIC: 0.5, Type.DRAGON: 0.5, Type.STEEL: 0.5 },
-    Type.FAIRY: { Type.FIGHTING: 0.5, Type.POISON: 2, Type.BUG: 0.5, Type.DRAGON: 0, Type.DARK: 0.5, Type.STEEL: 2 },
-    Type.FIGHTING: { Type.FLYING: 2, Type.ROCK: 0.5, Type.BUG: 0.5, Type.PSYCHIC: 2, Type.DARK: 0.5, Type.FAIRY: 2 },
-    Type.FIRE: { Type.ROCK: 2, Type.BUG: 0.5, Type.STEEL: 0.5, Type.FIRE: 0.5, Type.WATER: 2, Type.GRASS: 0.5, Type.ICE: 0.5, Type.DRAGON: 0.5, Type.GROUND: 2, Type.FAIRY: 0.5 },
-    Type.FLYING: { Type.FIGHTING: 0.5, Type.ROCK: 2, Type.BUG: 0.5, Type.GRASS: 0.5, Type.ELECTRIC: 2, Type.ICE: 2, Type.GROUND: 0 },
-    Type.GHOST: { Type.NORMAL: 0, Type.FIGHTING: 0, Type.POISON: 0.5, Type.BUG: 0.5, Type.GHOST: 2, Type.DARK: 2 },
-    Type.GRASS: { Type.FLYING: 2, Type.POISON: 2, Type.GROUND: 0.5, Type.BUG: 2, Type.FIRE: 2, Type.GRASS: 0.5, Type.WATER: 0.5, Type.ELECTRIC: 0.5, Type.ICE: 2 },
-    Type.GROUND: { Type.POISON: 0.5, Type.ROCK: 2, Type.WATER: 2, Type.GRASS: 0.5, Type.ELECTRIC: 0, Type.ICE: 2 },
-    Type.ICE: { Type.STEEL: 2, Type.FIRE: 2, Type.ICE: 0.5, Type.ROCK: 2, Type.FIGHTING: 2 },
-    Type.NORMAL: { Type.FIGHTING: 2, Type.GHOST: 0 },
-    Type.POISON: { Type.FIGHTING: 0.5, Type.POISON: 0.5, Type.GROUND: 2, Type.BUG: 0.5, Type.GRASS: 0.5, Type.FAIRY: 0.5, Type.PSYCHIC: 2 },
-    Type.PSYCHIC: { Type.FIGHTING: 0.5, Type.PSYCHIC: 0.5, Type.DARK: 2, Type.GHOST: 2, Type.BUG: 2 },
-    Type.ROCK: { Type.NORMAL: 0.5, Type.FIGHTING: 2, Type.FLYING: 0.5, Type.POISON: 0.5, Type.GROUND: 2, Type.STEEL: 2, Type.FIRE: 0.5, Type.WATER: 2, Type.GRASS: 2 },
-    Type.STEEL: { Type.NORMAL: 0.5, Type.FIGHTING: 2, Type.FLYING: 0.5, Type.ROCK: 0.5, Type.BUG: 0.5, Type.STEEL: 0.5, Type.FIRE: 2, Type.GRASS: 0.5, Type.ICE: 0.5, Type.FAIRY: 0.5, Type.POISON: 0, Type.GROUND: 2, Type.PSYCHIC: 0.5, Type.DRAGON: 0.5 },
-    Type.WATER: { Type.FIRE: 0.5, Type.WATER: 0.5, Type.GRASS: 2, Type.ELECTRIC: 2, Type.ICE: 0.5, Type.STEEL: 0.5 }
+    [Type.BUG]: { [Type.FIGHTING]: 0.5, [Type.FLYING]: 2, [Type.GROUND]: 0.5, [Type.ROCK]: 2, [Type.FIRE]: 2, [Type.GRASS]: 0.5 },
+    [Type.DARK]: { [Type.FIGHTING]: 2, [Type.PSYCHIC]: 0, [Type.BUG]: 2, [Type.GHOST]: 0.5, [Type.DARK]: 0.5, [Type.FAIRY]: 2 },
+    [Type.DRAGON]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.DRAGON]: 2, [Type.FAIRY]: 2 },
+    [Type.ELECTRIC]: { [Type.FLYING]: 0.5, [Type.GROUND]: 2, [Type.ELECTRIC]: 0.5, [Type.DRAGON]: 0.5, [Type.STEEL]: 0.5 },
+    [Type.FAIRY]: { [Type.FIGHTING]: 0.5, [Type.POISON]: 2, [Type.BUG]: 0.5, [Type.DRAGON]: 0, [Type.DARK]: 0.5, [Type.STEEL]: 2 },
+    [Type.FIGHTING]: { [Type.FLYING]: 2, [Type.ROCK]: 0.5, [Type.BUG]: 0.5, [Type.PSYCHIC]: 2, [Type.DARK]: 0.5, [Type.FAIRY]: 2 },
+    [Type.FIRE]: { [Type.ROCK]: 2, [Type.BUG]: 0.5, [Type.STEEL]: 0.5, [Type.FIRE]: 0.5, [Type.WATER]: 2, [Type.GRASS]: 0.5, [Type.ICE]: 0.5, [Type.DRAGON]: 0.5, [Type.GROUND]: 2, [Type.FAIRY]: 0.5 },
+    [Type.FLYING]: { [Type.FIGHTING]: 0.5, [Type.ROCK]: 2, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 2, [Type.ICE]: 2, [Type.GROUND]: 0 },
+    [Type.DELTA_FLYING]: { [Type.FIGHTING]: 0.5, [Type.ROCK]: 1, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 1, [Type.ICE]: 1, [Type.GROUND]: 0 },
+    [Type.GHOST]: { [Type.NORMAL]: 0, [Type.FIGHTING]: 0, [Type.POISON]: 0.5, [Type.BUG]: 0.5, [Type.GHOST]: 2, [Type.DARK]: 2 },
+    [Type.GRASS]: { [Type.FLYING]: 2, [Type.POISON]: 2, [Type.GROUND]: 0.5, [Type.BUG]: 2, [Type.FIRE]: 2, [Type.GRASS]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.ICE]: 2 },
+    [Type.GROUND]: { [Type.POISON]: 0.5, [Type.ROCK]: 2, [Type.WATER]: 2, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 0, [Type.ICE]: 2 },
+    [Type.ICE]: { [Type.STEEL]: 2, [Type.FIRE]: 2, [Type.ICE]: 0.5, [Type.ROCK]: 2, [Type.FIGHTING]: 2 },
+    [Type.NORMAL]: { [Type.FIGHTING]: 2, [Type.GHOST]: 0 },
+    [Type.POISON]: { [Type.FIGHTING]: 0.5, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.FAIRY]: 0.5, [Type.PSYCHIC]: 2 },
+    [Type.PSYCHIC]: { [Type.FIGHTING]: 0.5, [Type.PSYCHIC]: 0.5, [Type.DARK]: 2, [Type.GHOST]: 2, [Type.BUG]: 2 },
+    [Type.ROCK]: { [Type.NORMAL]: 0.5, [Type.FIGHTING]: 2, [Type.FLYING]: 0.5, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.STEEL]: 2, [Type.FIRE]: 0.5, [Type.WATER]: 2, [Type.GRASS]: 2 },
+    [Type.STEEL]: { [Type.NORMAL]: 0.5, [Type.FIGHTING]: 2, [Type.FLYING]: 0.5, [Type.ROCK]: 0.5, [Type.BUG]: 0.5, [Type.STEEL]: 0.5, [Type.FIRE]: 2, [Type.GRASS]: 0.5, [Type.ICE]: 0.5, [Type.FAIRY]: 0.5, [Type.POISON]: 0, [Type.GROUND]: 2, [Type.PSYCHIC]: 0.5, [Type.DRAGON]: 0.5 },
+    [Type.WATER]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.GRASS]: 2, [Type.ELECTRIC]: 2, [Type.ICE]: 0.5, [Type.STEEL]: 0.5 }
+  };
+
+  /**
+   * A mapping of power multipliers for power-modifying weathers and the type's whose powers are modified.
+   * @private
+   * @type {Object.<string, Object.<string, number>>}
+   */
+  const _weather = {
+    [Weather.HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0.5 },
+    [Weather.EXTREMELY_HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0 },
+    [Weather.RAIN]: { [Type.FIRE]: 0.5, [Type.WATER]: 1.5 },
+    [Weather.HEAVY_RAIN]: { [Type.FIRE]: 0, [Type.WATER]: 1.5 }
   };
 
   this.attack = function(fDefenderType, sDefenderType = Type.TYPELESS) {
     if (!(fDefenderType instanceof Type) || !(sDefenderType instanceof Type))
-      throw new TypeError("Arguments must be instances of Type");
+      throw new TypeError("Defender types must be instances of the Type function");
 
     let mod = 1;
-    if (_effectiveness.hasOwnProperty(fDefenderType) && _effectiveness[fDefenderType].hasOwnProperty[this]) {
+    if (_effectiveness.hasOwnProperty(fDefenderType) && _effectiveness[fDefenderType].hasOwnProperty(this)) {
       mod *= _effectiveness[fDefenderType][this];
     }
 
-    if (_effectiveness.hasOwnProperty(sDefenderType) && _effectiveness[sDefenderType].hasOwnProperty[this]) {
+    if (_effectiveness.hasOwnProperty(sDefenderType) && _effectiveness[sDefenderType].hasOwnProperty(this)) {
       mod *= _effectiveness[sDefenderType][this];
     }
 
     return mod;
+  };
+
+  this.passThrough = function(weather) {
+    if (!(weather instanceof Weather))
+      throw new TypeError("Weather must in an instance of the Weather function");
+
+    if (_weather.hasOwnProperty(weather) && _weather[weather].hasOwnProperty(this)) {
+      return _weather[weather][this];
+    }
+
+    // Either the weather doesn't affect the power of moves or this type isn't affected by the weather.
+    return 1;
   };
 
   this.toString = function() {
@@ -84,11 +109,33 @@ Type.ROCK = new Type();
 Type.STEEL = new Type();
 Type.WATER = new Type();
 
-function Weather() {
+// Flying type during Delta Stream
+Type.DELTA_FLYING = new Type();
 
+/**
+ * Represents a static instance of a weather condition in Pokemon games.
+ * The weather is determined by a predefined set of global variables.
+ *
+ * @class
+ */
+function Weather() {
+  /**
+   * The unique ID of the weather.
+   * @private
+   * @type {number}
+   */
+  const _id = __static__++;
+
+  this.toString = function() {
+    return `${_id}`;
+  };
 }
 
-// All valid known weathers
+/**
+ * All observed weathers in Pokemon games, excluding Pokemon XD.
+ * Each weather is instantiated statically as a property of the Weather object.
+ * @class
+ */
 Weather.NONE = new Weather();
 Weather.HARSH_SUN = new Weather();
 Weather.RAIN = new Weather();
