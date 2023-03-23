@@ -2,6 +2,24 @@ const fs = require('fs');
 const readline = require('readline');
 
 /**
+ * Finds the name of the property on the given function that refers to the given instance.
+ *
+ * @param {*} instance - The instance to search for.
+ * @param {Function} fn - The function to search in.
+ * @returns {string} - The name of the property on the function that refers to the given instance, or
+ *                     `${fn.name}.undefined` if the instance is not found in the function's properties.
+ */
+function getPropertyOfInstance(instance, fn) {
+  for (const prop in fn) {
+    if (fn[prop] === instance) {
+      return `${fn.name}.${prop}`;
+    }
+  }
+
+  return `${fn.name}.undefined`;
+}
+
+/**
  * Contains the base stat, type, and ability data of all available Pokemon up to Gen IX.
  * @type {Object<string, Object<string, number|Array<string>>>}
  */
@@ -53,6 +71,11 @@ Weather.STRONG_WINDS = new Weather();
  * @class
  */
 function Type() {
+  /**
+   * The string name of the type.
+   */
+  let _name = null;
+
   /**
    * The unique ID of the type.
    * @private
@@ -127,8 +150,16 @@ function Type() {
     return 1;
   };
 
+  this.getName = function() {
+    if (_name === null) {
+      _name = getPropertyOfInstance(this, Type);
+    }
+
+    return _name;
+  };
+
   this.toString = function() {
-    return `${_id}`;
+    return `#${_id}: ${this.getName()}`;
   };
 }
 
@@ -156,7 +187,14 @@ Type.WATER = new Type();
 // Flying type during Delta Stream
 Type.DELTA_FLYING = new Type();
 
+// Edge case when a second type read from the pokedex doesn't exist because a Pokemon is monotype
+Type.undefined = Type.TYPELESS;
+
 function Pokemon(name) {
+  const _name = name;
+
+  const [_type1, _type2] = [Type[pokedex[name].types[0]], Type[pokedex[name].types[1]]];
+
   this.data = pokedex[name];
 
   this.toString = function() {
