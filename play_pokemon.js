@@ -122,6 +122,14 @@ function Type() {
     [Weather.HEAVY_RAIN]: { [Type.FIRE]: 0, [Type.WATER]: 1.5 }
   };
 
+  /**
+   * Performs an attack with a defender type and optional secondary defender type.
+   * Calculates the attack modifier based on the effectiveness of the attack type against the defender type(s).
+   * @param {Type} fDefenderType - The primary defender type.
+   * @param {Type} [sDefenderType=Type.TYPELESS] - The optional secondary defender type.
+   * @throws {TypeError} If either defender type is not an instance of the Type function.
+   * @returns {number} The calculated attack modifier.
+   */
   this.attack = function(fDefenderType, sDefenderType = Type.TYPELESS) {
     if (!(fDefenderType instanceof Type) || !(sDefenderType instanceof Type))
       throw new TypeError("Defender types must be instances of the Type function");
@@ -138,6 +146,13 @@ function Type() {
     return mod;
   };
 
+  /**
+   * Calculates the effectiveness of this type in a given weather condition.
+   * @method
+   * @param {Weather} weather - The weather condition to calculate the effectiveness of this type against.
+   * @throws {TypeError} Throws an error if the input weather is not an instance of the Weather function.
+   * @returns {number} The effectiveness of this type against the given weather condition. Returns 1 if the weather condition does not affect this type or if this type is not affected by weather.
+   */
   this.attackThrough = function(weather) {
     if (!(weather instanceof Weather))
       throw new TypeError("Weather must in an instance of the Weather function");
@@ -150,6 +165,12 @@ function Type() {
     return 1;
   };
 
+  /**
+   * Returns the name of this type.
+   *
+   * @method
+   * @returns {string} The name of this type.
+   */
   this.getName = function() {
     if (_name === null) {
       _name = getPropertyOfInstance(this, Type);
