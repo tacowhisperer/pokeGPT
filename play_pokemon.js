@@ -6,17 +6,18 @@ const readline = require('readline');
  *
  * @param {*} instance - The instance to search for.
  * @param {Function} fn - The function to search in.
+ * @param {boolean} [incdlueFnName=true] - True if the function name should be prepended to the property name.
  * @returns {string} - The name of the property on the function that refers to the given instance, or
  *                     `${fn.name}.undefined` if the instance is not found in the function's properties.
  */
-function getPropertyOfInstance(instance, fn) {
+function getPropertyOfInstance(instance, fn, includeFnName = true) {
   for (const prop in fn) {
     if (fn[prop] === instance) {
-      return `${fn.name}.${prop}`;
+      return `${includeFnName ? fn.name + '.' : ''}${prop}`;
     }
   }
 
-  return `${fn.name}.undefined`;
+  return `${includeFnName ? fn.name + '.' : ''}undefined`;
 }
 
 /**
@@ -29,12 +30,89 @@ const pokedex = JSON.parse(fs.readFileSync('m_pokedex.json'));
  * A global counter used for generating unique IDs for static instances of Objects.
  * @type {number}
  */
-let __static__ = 0;
+let __static__ = 1;
+
+/**
+ * Represents a static instance of a Pokemon generation.
+ * Each generation is determined by a predefined set of global variables.
+ * @class
+ */
+function Gen() {
+  /**
+   * The unique ID of the Pokemon generation.
+   * @private
+   * @type {number}
+   */
+  const _id = __static__++;
+
+  /**
+   * Regex that matches Roman numerals from 1 to 3999.
+   * @private
+   * @type {Regex}
+   */
+  const romanNumeralRegex = /^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+  /**
+   * The string name of the generation.
+   */
+  let _name = null;
+
+  this.match = function(genRange) {
+    // A generation range has been specified
+    if (genRange.match(/^\d+-\d+$/)) {
+
+    }
+
+    // A minimum generation has been specified
+    else if (genRange.match(/^\d+\+$/)) {
+
+    }
+
+    // A specific generation has been specified
+    else if (genRange.match(/^\d+$/)) {
+
+    }
+
+    // TODO: Implement some sort of format error because the generation range given is garbage.
+  };
+
+  /**
+   * Returns the name of this generation.
+   *
+   * @method
+   * @returns {string} The name of this generation.
+   */
+  this.getName = function() {
+    if (_name === null) {
+      _name = getPropertyOfInstance(this, Type, false);
+    }
+
+    return _name;
+  };
+
+  this.toString = function() {
+    return `Gen ${this.getName()} (${_id})`;
+  };
+}
+
+/**
+ * All Pokemon generations current and past.
+ * Each generation is instantiated statically as a property of the Gen object.
+ * @class
+ */
+Gen.I = new Gen();
+Gen.II = new Gen();
+Gen.III = new Gen();
+Gen.IV = new Gen();
+Gen.V = new Gen();
+Gen.VI = new Gen();
+Gen.VII = new Gen();
+Gen.VIII = new Gen();
+Gen.IX = new Gen();
 
 /**
  * Represents a static instance of a weather condition in Pokemon games.
  * The weather is determined by a predefined set of global variables.
- *
  * @class
  */
 function Weather() {
@@ -211,12 +289,88 @@ Type.DELTA_FLYING = new Type();
 // Edge case when a second type read from the pokedex doesn't exist because a Pokemon is monotype
 Type.undefined = Type.TYPELESS;
 
-function Pokemon(name) {
+/**
+ * Create a new instance of StatDistribution with given stat values.
+ * @param {Object} param - The object containing stat values.
+ * @param {number} [param.hp=0] - The HP value.
+ * @param {number} [param.atk=0] - The Attack value.
+ * @param {number} [param.def=0] - The Defense value.
+ * @param {number} [param["sp.atk"]=0] - The Special Attack value.
+ * @param {number} [param["sp.def"]=0] - The Special Defense value.
+ * @param {number} [param.spe=0] - The Speed value.
+ */
+function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.def": spDef = 0, spe = 0}) {
+  const _hpVal = hp;
+  const _atkVal = atk;
+  const _defVal = def;
+  const _spAtkVal = spAtk;
+  const _spDefVal = spDef;
+  const _speVal = spe;
+
+  /**
+   * Get the current HP value.
+   * @returns {number} The current HP value.
+   */
+  this.getHpVal = function() {
+    return _hpVal;
+  };
+
+  /**
+   * Get the current Attack value.
+   * @returns {number} The current Attack value.
+   */
+  this.getAtkVal = function() {
+    return _atkVal;
+  };
+
+  /**
+   * Get the current Defense value.
+   * @returns {number} The current Defense value.
+   */
+  this.getDefVal = function() {
+    return _defVal;
+  };
+
+  /**
+   * Get the current Special Attack value.
+   * @returns {number} The current Special Attack value.
+   */
+  this.getSpAtkVal = function() {
+    return _spAtkVal;
+  };
+
+  /**
+   * Get the current Special Defense value.
+   * @returns {number} The current Special Defense value.
+   */
+  this.getSpDefVal = function() {
+    return _spDefVal;
+  };
+
+  /**
+   * Get the current Speed value.
+   * @returns {number} The current Speed value.
+   */
+  this.getSpeVal = function() {
+    return _speVal;
+  };
+}
+
+
+function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
   const _name = name;
 
   const [_type1, _type2] = [Type[pokedex[name].types[0]], Type[pokedex[name].types[1]]];
 
   this.data = pokedex[name];
+
+  this.getFirstType = function() {
+    return _type1;
+  };
+
+  this.getSecondType = function() {
+    return _type2;
+  };
 
   this.toString = function() {
     return JSON.stringify(this.data, null, 4);
