@@ -46,34 +46,48 @@ function Gen() {
   const _id = __static__++;
 
   /**
-   * Regex that matches Roman numerals from 1 to 3999.
-   * @private
-   * @type {Regex}
-   */
-  const romanNumeralRegex = /^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
-
-  /**
    * The string name of the generation.
    */
   let _name = null;
+  
+  /**
+   * Regex string that matches Roman numerals from 1 to 3999.
+   * @private
+   * @type {string}
+   */
+  const _rnrStr = '(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})';
 
   this.match = function(genRange) {
-    // A generation range has been specified
-    if (genRange.match(/^\d+-\d+$/)) {
+    let match;
 
+    // A generation range has been specified
+    if ((match = genRange.match(/^(\d+)\s*-\s*(\d+)$/)) ||
+      (match = genRange.match(new RegExp(`^(${_rnrStr})\\s*-\\s*(${_rnrStr})$`)))) {
+      const [_, minGenStr, maxGenStr] = match;
+      const [g1, g2] = [romanToNumber(minGenStr), romanToNumber(maxGenStr)]
+      const [minGen, maxGen] = [Math.min(g1, g2), Math.max(g1, g2)]
+
+      // TODO: Finish this...
     }
 
     // A minimum generation has been specified
-    else if (genRange.match(/^\d+\+$/)) {
+    else if ((match = genRange.match(/^(\d+)\+$/))) {
+      const [_, minGenStr] = match;
+      const minGen = romanToNumber(minGenStr);
 
+      // TODO: Finish this...
     }
 
     // A specific generation has been specified
-    else if (genRange.match(/^\d+$/)) {
+    else if ((match = genRange.match(/^\d+$/))) {
+      const [_, genStr] = match;
+      const gen = romanToNumber(genStr);
 
+      // TODO: Finish this...
     }
 
-    // TODO: Implement some sort of format error because the generation range given is garbage.
+    // The generation range given is not in an acceptable format to be checked with this generation.
+    throw new TypeError('Invalid generation range format provided.');
   };
 
   /**
@@ -93,6 +107,38 @@ function Gen() {
   this.toString = function() {
     return `Gen ${this.getName()} (${_id})`;
   };
+
+  /**
+   * Converts a Roman numeral string to a number.
+   * @private
+   * @param {string} rNumeral - The Roman numeral string to convert.
+   * @returns {number} - The converted number.
+   * @throws {TypeError} - Throws an error if the input is not a valid Roman numeral string.
+   */
+  function romanToNumber(rNumeral) {
+    // Simple conversion for strings that are already pretty much numbers.
+    if (rNumeral.match(/^\d+$/))
+      return +rNumeral;
+
+    const rnRgx = new RegExp(`^${_rnrStr}$`);
+    const rnMap = {
+      M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1
+    };
+
+    let result = 0;
+    let match;
+
+    if ((match = rNumeral.match(rnRgx))) {
+      for (let i = 1; i <= 4; i++) {
+        const numeral = match[i] || '';
+        const value = rnMap[numeral];
+        result += value || 0;
+      }
+      return result;
+    } else {
+      throw new TypeError('Invalid Roman numeral string');
+    }
+  }
 }
 
 /**
