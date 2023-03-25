@@ -51,39 +51,40 @@ function Gen() {
   let _name = null;
   
   /**
-   * Regex string that matches Roman numerals from 1 to 3999.
+   * Regex string that matches Roman numerals from 1 to 100.
    * @private
    * @type {string}
    */
-  const _rnrStr = '(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})';
+  const _rnrStr = '(C|XC|L|XL|X{0,3}(IX|IV|V?I{0,3})|IX|IV|V|I)';
 
   this.match = function(genRange) {
+    const thisGen = romanToNumber(this.getName());
     let match;
 
-    // A generation range has been specified
+    // A generation range has been specified in the form DIGIT(S)-DIGIT(S) or ROMAN_NUM-ROMAN_NUM
     if ((match = genRange.match(/^(\d+)\s*-\s*(\d+)$/)) ||
       (match = genRange.match(new RegExp(`^(${_rnrStr})\\s*-\\s*(${_rnrStr})$`)))) {
       const [_, minGenStr, maxGenStr] = match;
-      const [g1, g2] = [romanToNumber(minGenStr), romanToNumber(maxGenStr)]
-      const [minGen, maxGen] = [Math.min(g1, g2), Math.max(g1, g2)]
+      const [g1, g2] = [romanToNumber(minGenStr), romanToNumber(maxGenStr)];
+      const [minGen, maxGen] = [Math.min(g1, g2), Math.max(g1, g2)];
 
-      // TODO: Finish this...
+      return thisGen >= minGen && thisGen <= maxGen;
     }
 
     // A minimum generation has been specified
-    else if ((match = genRange.match(/^(\d+)\+$/))) {
+    else if ((match = genRange.match(/^(\d+)\+$/)) || (match = genRange.match(new RegExp(`^(${_rnrStr})\\+$`)))) {
       const [_, minGenStr] = match;
       const minGen = romanToNumber(minGenStr);
 
-      // TODO: Finish this...
+      return thisGen >= minGen;
     }
 
     // A specific generation has been specified
-    else if ((match = genRange.match(/^\d+$/))) {
+    else if ((match = genRange.match(/^\d+$/)) || (match = genRange.match(new RegExp(`^(${_rnrStr})$`)))) {
       const [_, genStr] = match;
       const gen = romanToNumber(genStr);
 
-      // TODO: Finish this...
+      return thisGen === gen;
     }
 
     // The generation range given is not in an acceptable format to be checked with this generation.
@@ -122,7 +123,7 @@ function Gen() {
 
     const rnRgx = new RegExp(`^${_rnrStr}$`);
     const rnMap = {
-      M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1
+      C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1
     };
 
     let result = 0;
