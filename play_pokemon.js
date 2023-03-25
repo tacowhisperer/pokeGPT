@@ -57,6 +57,14 @@ function Gen() {
    */
   const _rnrStr = '(C|XC|L|XL|X{0,3}(IX|IV|V?I{0,3})|IX|IV|V|I)';
 
+  /**
+   * Matches the generation of this object with a specified generation range.
+   * @method
+   * @param {string} genRange - The specified generation range in the form of "DIGIT(S)-DIGIT(S)" or
+   *                            "ROMAN_NUM-ROMAN_NUM" or "DIGIT(S)+" or "ROMAN_NUM+"
+   * @returns {boolean} - Returns true if this object's generation falls within the specified range, else false.
+   * @throws {TypeError} - Throws an error if the specified generation range is not in an acceptable format.
+   */
   this.match = function(genRange) {
     const thisGen = romanToNumber(this.getName());
     let match;
@@ -80,7 +88,7 @@ function Gen() {
     }
 
     // A specific generation has been specified
-    else if ((match = genRange.match(/^\d+$/)) || (match = genRange.match(new RegExp(`^(${_rnrStr})$`)))) {
+    else if ((match = genRange.match(/^(\d+)$/)) || (match = genRange.match(new RegExp(`^(${_rnrStr})$`)))) {
       const [_, genStr] = match;
       const gen = romanToNumber(genStr);
 
@@ -99,7 +107,7 @@ function Gen() {
    */
   this.getName = function() {
     if (_name === null) {
-      _name = getPropertyOfInstance(this, Type, false);
+      _name = getPropertyOfInstance(this, Gen, false);
     }
 
     return _name;
@@ -110,34 +118,56 @@ function Gen() {
   };
 
   /**
-   * Converts a Roman numeral string to a number.
+   * Converts a Roman numeral or regular number string to a decimal number.
    * @private
-   * @param {string} rNumeral - The Roman numeral string to convert.
-   * @returns {number} - The converted number.
-   * @throws {TypeError} - Throws an error if the input is not a valid Roman numeral string.
+   * @param {string} str The input string to convert.
+   * @returns {number} The decimal equivalent of the input string, or NaN if the input is invalid.
    */
-  function romanToNumber(rNumeral) {
-    // Simple conversion for strings that are already pretty much numbers.
-    if (rNumeral.match(/^\d+$/))
-      return +rNumeral;
-
-    const rnRgx = new RegExp(`^${_rnrStr}$`);
-    const rnMap = {
-      C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1
+  function romanToNumber(str) {
+    /**
+     * A map of Roman numerals to their decimal equivalents.
+     *
+     * @private
+     * @type {Object.<string, number>}
+     */
+    const romanNumeralMap = {
+      'I': 1,
+      'IV': 4,
+      'V': 5,
+      'IX': 9,
+      'X': 10,
+      'XL': 40,
+      'L': 50,
+      'XC': 90,
+      'C': 100
     };
 
-    let result = 0;
-    let match;
+    /**
+     * Checks if a string is a valid Roman numeral.
+     *
+     * @private
+     * @param {string} str The input string to check.
+     * @returns {boolean} True if the input string is a valid Roman numeral, false otherwise.
+     */
+    function isValidRomanNumeral(str) {
+      return /^M{0,10}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/.test(str);
+    }
 
-    if ((match = rNumeral.match(rnRgx))) {
-      for (let i = 1; i <= 4; i++) {
-        const numeral = match[i] || '';
-        const value = rnMap[numeral];
-        result += value || 0;
+    if (isValidRomanNumeral(str)) {
+      let result = 0;
+      for (let i = 0; i < str.length; i++) {
+        if (romanNumeralMap[str[i]] < romanNumeralMap[str[i+1]]) {
+          result -= romanNumeralMap[str[i]];
+        } else {
+          result += romanNumeralMap[str[i]];
+        }
       }
       return result;
+    } else if (!isNaN(Number(str))) {
+      return Number(str);
     } else {
-      throw new TypeError('Invalid Roman numeral string');
+      console.warn('Input is not a valid Roman numeral or number!');
+      return NaN;
     }
   }
 }
@@ -433,7 +463,7 @@ rl.question('Name a Pokemon: ', (name) => {
   if (!pokedex.hasOwnProperty(name)) {
     console.log("This Pokemon doesn't exist.");
   } else {
-    const pkm = new Pokemon(name);
+    const pkm = new Pokemon({name: name});
     console.log(`These are the stats for "${name}":`);
     console.log(pkm.toString());
     console.log(`Internally, "${name}" has Type values of ${pkm.data.types.map(t => `"${Type[t].toString()}"`).join(", and ")}`);
