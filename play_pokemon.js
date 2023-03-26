@@ -377,12 +377,27 @@ Type.undefined = Type.TYPELESS;
  * @param {number} [param.spe=0] - The Speed value.
  */
 function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.def": spDef = 0, spe = 0}) {
-  const _hpVal = hp;
-  const _atkVal = atk;
-  const _defVal = def;
-  const _spAtkVal = spAtk;
-  const _spDefVal = spDef;
-  const _speVal = spe;
+  let _hpVal = hp;
+  let _atkVal = atk;
+  let _defVal = def;
+  let _spAtkVal = spAtk;
+  let _spDefVal = spDef;
+  let _speVal = spe;
+
+  /**
+   * Get all stats in a single call.
+   * @returns {Object} The current value of all stats as an Object.
+   */
+  this.getStats = function() {
+    return {
+      hp: _hpVal,
+      atk: _atkVal,
+      def: _defVal,
+      spAtk: _spAtkVal,
+      spDef: _spDefVal,
+      spe: _speVal
+    };
+  };
 
   /**
    * Get the current HP value.
@@ -390,6 +405,15 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
    */
   this.getHpVal = function() {
     return _hpVal;
+  };
+
+  /**
+   * Set the HP value.
+   * @param {number} newVal - The new HP value.
+   */
+  this.setHpVal = function(newVal) {
+    _hpVal = newVal;
+    return this;
   };
 
   /**
@@ -401,11 +425,29 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
   };
 
   /**
+   * Set the Attack value.
+   * @param {number} newVal - The new Attack value.
+   */
+  this.setAtkVal = function(newVal) {
+    _atkVal = newVal;
+    return this;
+  };
+
+  /**
    * Get the current Defense value.
    * @returns {number} The current Defense value.
    */
   this.getDefVal = function() {
     return _defVal;
+  };
+
+  /**
+   * Set the Defense value.
+   * @param {number} newVal - The new Defense value.
+   */
+  this.setDefVal = function(newVal) {
+    _defVal = newVal;
+    return this;
   };
 
   /**
@@ -417,11 +459,29 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
   };
 
   /**
+   * Set the Special Attack value.
+   * @param {number} newVal - The new Special Attack value.
+   */
+  this.setSpAtkVal = function(newVal) {
+    _spAtkVal = newVal;
+    return this;
+  };
+
+  /**
    * Get the current Special Defense value.
    * @returns {number} The current Special Defense value.
    */
   this.getSpDefVal = function() {
     return _spDefVal;
+  };
+
+  /**
+   * Set the Special Defense value.
+   * @param {number} newVal - The new Special Defense value.
+   */
+  this.setSpDefVal = function(newVal) {
+    _spDefVal = newVal;
+    return this;
   };
 
   /**
@@ -431,8 +491,195 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
   this.getSpeVal = function() {
     return _speVal;
   };
+
+  /**
+   * Set the Speed value.
+   * @param {number} newVal - The new Speed value.
+   */
+  this.setSpeVal = function(newVal) {
+    _speVal = newVal;
+    return this;
+  };
 }
 
+/**
+ * Creates an object representing the distribution of effort values (EVs) of a Pokémon.
+ * Effort values represent a Pokemon's training and are typically gained after defeating enemy Pokemon.
+ * 
+ * @class
+ * @augments StatDistribution
+ * @param {Object} stats - An object containing the EVs for each stat.
+ * @param {number} stats.hp - The EVs for HP.
+ * @param {number} stats.atk - The EVs for Attack.
+ * @param {number} stats.def - The EVs for Defense.
+ * @param {number} stats.spAtk - The EVs for Special Attack.
+ * @param {number} stats.spDef - The EVs for Special Defense.
+ * @param {number} stats.spe - The EVs for Speed.
+ * @throws {RangeError} If any individual stat has a value less than 0 or greater than 252, or if the total sum of EVs exceeds 510.
+ */
+class EVs extends StatDistribution {
+  constructor({ hp = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0 }) {
+    const stats = { hp, atk, def, spAtk, spDef, spe };
+    for (let ev in stats) {
+      stats[ev] = this.#checkEV(ev, stats[ev]);
+    }
+    this.#checkEVSum(stats);
+    super(stats);
+  }
+
+  /**
+   * Validates that an individual EV is within the valid range of 0 to 252.
+   * If the value is less than 0, it sets the value to 0 and logs a warning.
+   * If the value is greater than 252, it sets the value to 252 and logs a warning.
+   * 
+   * @private
+   * @param {string} ev - The name of the EV to check.
+   * @param {number} evVal - The value of the EV to check.
+   * @returns {number} - The validated EV value.
+   */
+  #checkEV(ev, evVal) {
+    if (evVal < 0) {
+      console.warn(`The "${ev}" effort value is less than 0. Its value will be set to 0.`);
+      return 0;
+    } else if (evVal > 252) {
+      console.warn(`The "${ev}" effort value is greater than 252. Its value will be set to 252.`);
+      return 252;
+    }
+    return evVal;
+  }
+
+  /**
+   * Validates that the total sum of all EVs does not exceed 510.
+   * If the total sum exceeds 510, it throws a RangeError.
+   * 
+   * @private
+   * @param {Object} evs - An object containing the EVs for each stat.
+   * @returns {this} - Returns the instance of the EVs class.
+   * @throws {RangeError} If the total sum of EVs exceeds 510.
+   */
+  #checkEVSum(evs) {
+    let evTotal = 0;
+    for (let ev in evs) {
+      evTotal += evs[ev];
+    }
+    if (evTotal > 510) {
+      throw new RangeError(`The total sum of EVs may not exceed 510. Got ${evTotal}.`);
+    }
+
+    return this;
+  }
+
+    /**
+   * Sets the value of HP and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new HP value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setHpVal(newVal) {
+    return super.setHpVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+
+  /**
+   * Sets the value of Attack and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new Attack value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setAtkVal(newVal) {
+    return super.setAtkVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+
+  /**
+   * Sets the value of Defense and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new Defense value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setDefVal(newVal) {
+    return super.setDefVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+
+  /**
+   * Sets the value of Special Attack and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new Special Attack value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setSpAtkVal(newVal) {
+    return super.setSpAtkVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+
+  /**
+   * Sets the value of Special Defense and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setSpDefVal(newVal) {
+    return super.setSpDefVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+
+  /**
+   * Sets the value of Speed and updates the EV sum accordingly.
+   * 
+   * @param {number} newVal - The new Speed value.
+   * @returns {EVs} This object, allowing for method chaining.
+   * @throws {RangeError} If the new value is less than 0 or greater than 252.
+   */
+  setSpeVal(newVal) {
+    return super.setSpeVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+  }
+}
+
+/**
+ * Creates an object representing a Pokémon's Individual Values (IVs) for each stat.
+ * Individual values are values between 0 and 31 that represent a Pokémon's genetics.
+ * 
+ * @class
+ * @augments StatDistribution
+ * @param {Object} stats - An object with properties for each of the six stats, representing the Pokémon's IVs for each stat. Missing values default to 0.
+ * @param {number} [stats.hp=0] - The IV for the HP stat.
+ * @param {number} [stats.atk=0] - The IV for the Attack stat.
+ * @param {number} [stats.def=0] - The IV for the Defense stat.
+ * @param {number} [stats.spAtk=0] - The IV for the Special Attack stat.
+ * @param {number} [stats.spDef=0] - The IV for the Special Defense stat.
+ * @param {number} [stats.spe=0] - The IV for the Speed stat.
+ */
+class IVs extends StatDistribution {
+  constructor({hp = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
+    const stats = {hp: hp, atk: atk, def: def, spAtk: spAtk, spDef: spDef, spe: spe};
+    for (let iv in stats) {
+      stats[iv] = this.#checkIV(iv, stats[iv]);
+    }
+
+    super(stats);
+  }
+
+  #checkIV(iv, ivVal) {
+    if (ivVal < 0) {
+      console.warn(`The "${iv}" individual value is less than 0. Its value will be set to 0.`);
+      return 0;
+    } else if (ivVal > 31) {
+      console.warn(`The "${iv}" individual value is greater than 31. Its value will be set to 31.`);
+      return 31;
+    }
+
+    return ivVal;
+  }
+
+  // TODO: Finish this
+  // setHpVal
+  // setAtkVal
+  // setDefVal
+  // setSpAtkVal
+  // setSpDefVal
+  // setSpeVal
+}
 
 function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
   const _name = name;
