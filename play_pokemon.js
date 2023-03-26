@@ -642,7 +642,8 @@ class EVs extends StatDistribution {
  * 
  * @class
  * @augments StatDistribution
- * @param {Object} stats - An object with properties for each of the six stats, representing the Pokémon's IVs for each stat. Missing values default to 0.
+ * @param {Object} stats - An object with properties for each of the six stats, representing the Pokémon's IVs for each
+ *                         stat. Missing values default to 0.
  * @param {number} [stats.hp=0] - The IV for the HP stat.
  * @param {number} [stats.atk=0] - The IV for the Attack stat.
  * @param {number} [stats.def=0] - The IV for the Defense stat.
