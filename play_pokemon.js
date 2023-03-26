@@ -577,7 +577,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setHpVal(newVal) {
-    return super.setHpVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setHpVal(this.#checkEV("hp", newVal)).#checkEVSum(this.getStats());
   }
 
   /**
@@ -588,7 +588,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setAtkVal(newVal) {
-    return super.setAtkVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setAtkVal(this.#checkEV("atk", newVal)).#checkEVSum(this.getStats());
   }
 
   /**
@@ -599,7 +599,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setDefVal(newVal) {
-    return super.setDefVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setDefVal(this.#checkEV("spDef", newVal)).#checkEVSum(this.getStats());
   }
 
   /**
@@ -610,7 +610,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setSpAtkVal(newVal) {
-    return super.setSpAtkVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setSpAtkVal(this.#checkEV("spAtk", newVal)).#checkEVSum(this.getStats());
   }
 
   /**
@@ -621,7 +621,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setSpDefVal(newVal) {
-    return super.setSpDefVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setSpDefVal(this.#checkEV("spDef", newVal)).#checkEVSum(this.getStats());
   }
 
   /**
@@ -632,7 +632,7 @@ class EVs extends StatDistribution {
    * @throws {RangeError} If the new value is less than 0 or greater than 252.
    */
   setSpeVal(newVal) {
-    return super.setSpeVal(this.#checkEV(newVal)).#checkEVSum(this.getStats());
+    return super.setSpeVal(this.#checkEV("spe", newVal)).#checkEVSum(this.getStats());
   }
 }
 
@@ -660,6 +660,14 @@ class IVs extends StatDistribution {
     super(stats);
   }
 
+  /**
+   * Checks an individual value (IV) to ensure it falls within the valid range of 0 to 31. If it falls outside this
+   * range, a warning message is logged to the console and the value is set to the nearest valid value.
+   * @private
+   * @param {string} iv - The name of the IV being checked (e.g. "hp", "atk", "def", etc.).
+   * @param {number} ivVal - The value of the IV being checked.
+   * @returns {number} The valid IV value (i.e. a value between 0 and 31, inclusive).
+   */
   #checkIV(iv, ivVal) {
     if (ivVal < 0) {
       console.warn(`The "${iv}" individual value is less than 0. Its value will be set to 0.`);
@@ -672,13 +680,71 @@ class IVs extends StatDistribution {
     return ivVal;
   }
 
-  // TODO: Finish this
-  // setHpVal
-  // setAtkVal
-  // setDefVal
-  // setSpAtkVal
-  // setSpDefVal
-  // setSpeVal
+  /**
+   * Sets the value of HP and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or 31,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setHpVal(newVal) {
+    return super.setHpVal(this.#checkIV("hp", newVal));
+  }
+
+  /**
+   * Sets the value of Attack and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
+   * 31, respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setAtkVal(newVal) {
+    return super.setAtkVal(this.#checkIV("atk", newVal));
+  }
+
+  /**
+   * Sets the value of Defense and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
+   * 31, respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setDefVal(newVal) {
+    return super.setDefVal(this.#checkIV("def", newVal));
+  }
+
+  /**
+   * Sets the value of Special Attack and updates the IV accordingly. If the value falls below 0 or above 31, it is set
+   * to 0 or 31, respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setSpAtkVal(newVal) {
+    return super.setSpAtkVal(this.#checkIV("spAtk", newVal));
+  }
+
+  /**
+   * Sets the value of Special Defense and updates the IV accordingly. If the value falls below 0 or above 31, it is set
+   * to 0 or 31, respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setSpDefVal(newVal) {
+    return super.setSpDefVal(this.#checkIV("spDef", newVal));
+  }
+
+  /**
+   * Sets the value of Speed and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
+   * 31, respectively.
+   * 
+   * @param {number} newVal - The new Special Defense value.
+   * @returns {IVs} This object, allowing for method chaining.
+   */
+  setSpeVal(newVal) {
+    return super.setSpeVal(this.#checkIV("spe", newVal));
+  }
 }
 
 function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
