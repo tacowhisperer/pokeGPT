@@ -186,6 +186,8 @@ Gen.VI = new Gen();
 Gen.VII = new Gen();
 Gen.VIII = new Gen();
 Gen.IX = new Gen();
+Object.freeze(Gen.prototype);
+Object.freeze(Gen);
 
 /**
  * Represents a static instance of a weather condition in Pokemon games.
@@ -220,6 +222,8 @@ Weather.FOG = new Weather();
 Weather.EXTREMELY_HARSH_SUN = new Weather();
 Weather.HEAVY_RAIN = new Weather();
 Weather.STRONG_WINDS = new Weather();
+Object.freeze(Weather.prototype);
+Object.freeze(Weather);
 
 /**
  * Represents a Pokemon type.
@@ -365,6 +369,8 @@ Type.DELTA_FLYING = new Type();
 
 // Edge case when a second type read from the pokedex doesn't exist because a Pokemon is monotype
 Type.undefined = Type.TYPELESS;
+Object.freeze(Type.prototype);
+Object.freeze(Type);
 
 /**
  * Create a new instance of StatDistribution with given stat values.
@@ -653,7 +659,7 @@ class EVs extends StatDistribution {
  */
 class IVs extends StatDistribution {
   constructor({hp = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
-    const stats = {hp: hp, atk: atk, def: def, spAtk: spAtk, spDef: spDef, spe: spe};
+    const stats = { hp, atk, def, spAtk, spDef, spe };
     for (let iv in stats) {
       stats[iv] = this.#checkIV(iv, stats[iv]);
     }
@@ -685,7 +691,7 @@ class IVs extends StatDistribution {
    * Sets the value of HP and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or 31,
    * respectively.
    * 
-   * @param {number} newVal - The new Special Defense value.
+   * @param {number} newVal - The new HP value.
    * @returns {IVs} This object, allowing for method chaining.
    */
   setHpVal(newVal) {
@@ -696,7 +702,7 @@ class IVs extends StatDistribution {
    * Sets the value of Attack and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
    * 31, respectively.
    * 
-   * @param {number} newVal - The new Special Defense value.
+   * @param {number} newVal - The new Attack value.
    * @returns {IVs} This object, allowing for method chaining.
    */
   setAtkVal(newVal) {
@@ -707,7 +713,7 @@ class IVs extends StatDistribution {
    * Sets the value of Defense and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
    * 31, respectively.
    * 
-   * @param {number} newVal - The new Special Defense value.
+   * @param {number} newVal - The new Defense value.
    * @returns {IVs} This object, allowing for method chaining.
    */
   setDefVal(newVal) {
@@ -718,7 +724,7 @@ class IVs extends StatDistribution {
    * Sets the value of Special Attack and updates the IV accordingly. If the value falls below 0 or above 31, it is set
    * to 0 or 31, respectively.
    * 
-   * @param {number} newVal - The new Special Defense value.
+   * @param {number} newVal - The new Special Attack value.
    * @returns {IVs} This object, allowing for method chaining.
    */
   setSpAtkVal(newVal) {
@@ -740,13 +746,174 @@ class IVs extends StatDistribution {
    * Sets the value of Speed and updates the IV accordingly. If the value falls below 0 or above 31, it is set to 0 or
    * 31, respectively.
    * 
-   * @param {number} newVal - The new Special Defense value.
+   * @param {number} newVal - The new Speed value.
    * @returns {IVs} This object, allowing for method chaining.
    */
   setSpeVal(newVal) {
     return super.setSpeVal(this.#checkIV("spe", newVal));
   }
 }
+
+/**
+ * Creates an object representing a Pokémon's stat stages.
+ * Each change in stage is mapped to a multiplier on the Pokemon's effective stat.
+ * 
+ * @class
+ * @augments StatDistribution
+ * @param {Object} stats - An object with properties for each of the 7 stats that have stages.
+ *                         Missing values default to 0.
+ * @param {number} [stats.evasion=0] - The stage for the evasion stat.
+ * @param {number} [stats.accuracy=0] - The stage for the accuracy stat.
+ * @param {number} [stats.atk=0] - The stage for the Attack stat.
+ * @param {number} [stats.def=0] - The stage for the Defense stat.
+ * @param {number} [stats.spAtk=0] - The stage for the Special Attack stat.
+ * @param {number} [stats.spDef=0] - The stage for the Special Defense stat.
+ * @param {number} [stats.spe=0] - The stage for the Speed stat.
+ */
+class Stages extends StatDistribution {
+  #evasion;
+  #accuracy;
+
+  constructor({evasion = 0, accuracy = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
+    const stats = { atk, def, spAtk, spDef, spe };
+    for (let stage in stats) {
+      stats[stage] = this.#checkStage(stage, stats[stage]);
+    }
+
+    this.#evasion = evasion;
+    this.#accuracy = accuracy;
+    super(stats);
+  }
+
+  /**
+   * Checks a stat's stage to ensure it falls within the valid range of -6 to 6. If it falls outside this
+   * range, a warning message is logged to the console and the value is set to the nearest valid value.
+   * @private
+   * @param {string} stat - The name of the stat being checked (e.g. "hp", "atk", "def", etc.).
+   * @param {number} statStage - The value of the stage being checked.
+   * @returns {number} The valid stage value (i.e. a value between -6 and 6, inclusive).
+   */
+  #checkStage(stat, statStage) {
+    if (statStage < -6) {
+      console.warn(`The "${stat}" stage is less than -6. Its value will be set to -6.`);
+      return -6;
+    } else if (statStage > 6) {
+      console.warn(`The "${stat}" stage is greater than 6. Its value will be set to 6.`);
+      return 6;
+    }
+
+    return statStage;
+  }
+
+  /**
+   * Gets the current stage values for all stats which have stages in battle.
+   * @returns {Object} The stages for accuracy, evasion, atk, def, spAtk, spDef, and spe.
+   */
+  getStats() {
+    const {hp, ...rest} = super.getStats();
+
+    return {...rest, evasion: this.getEvasionVal(), accuracy: this.getAccuracyVal()};
+  }
+
+  /**
+   * Gets the current stage values for all stats which have stages in battle.
+   * @returns {Object} The stages for accuracy, evasion, atk, def, spAtk, spDef, and spe.
+   */
+  getStages() {
+    return this.getStats();
+  }
+
+  /**
+   * Get the current Evasion stat stage.
+   * @returns {number} The current Evasion stat stage.
+   */
+  getEvasionVal() {
+    return this.#evasion;
+  };
+
+  /**
+   * Get the current Accuracy stat stage.
+   * @returns {number} The current Accuracy stat stage.
+   */
+  getAccuracyVal() {
+    return this.#accuracy;
+  }
+
+  /**
+   * The HP stat does not have a valid stage or multiplied by stages.
+   * @returns {null} Should throw errors in code that expects number types.
+   */
+  getHpVal() {
+    return null;
+  }
+
+  /**
+   * The HP stat is not affected by stat stages. As such, any calls to this method result in a warning log.
+   * 
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setHpVal(newVal) {
+    console.warn(`HP is not updated by stat stages (attempted to set to ${newVal}).`);
+    return this;
+  }
+
+  /**
+   * Sets the value of Attack stage accordingly. If the value falls below -6 or above 6, it is set to -6 or 6,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Attack stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setAtkVal(newVal) {
+    return super.setAtkVal(this.#checkStage("atk", newVal));
+  }
+
+  /**
+   * Sets the value of Defense stage accordingly. If the value falls below -6 or above 6, it is set to -6 or 6,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Defense stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setDefVal(newVal) {
+    return super.setDefVal(this.#checkStage("def", newVal));
+  }
+
+  /**
+   * Sets the value of Special Attack stage accordingly. If the value falls below -6 or above 6, it is set to -6 or 6,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Special Attack stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setSpAtkVal(newVal) {
+    return super.setSpAtkVal(this.#checkStage("spAtk", newVal));
+  }
+
+  /**
+   * Sets the value of Special Defense stage accordingly. If the value falls below -6 or above 6, it is set to -6 or 6,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Special Defense stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setSpDefVal(newVal) {
+    return super.setSpDefVal(this.#checkStage("spDef", newVal));
+  }
+
+  /**
+   * Sets the value of Speed stage accordingly. If the value falls below -6 or above 6, it is set to -6 or 6,
+   * respectively.
+   * 
+   * @param {number} newVal - The new Speed stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setSpeVal(newVal) {
+    return super.setSpeVal(this.#checkStage("spe", newVal));
+  }
+}
+
+
 
 function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
   const _name = name;
