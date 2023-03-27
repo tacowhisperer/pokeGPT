@@ -771,6 +771,10 @@ class IVs extends StatDistribution {
  * @param {number} [stats.spe=0] - The stage for the Speed stat.
  */
 class Stages extends StatDistribution {
+  /**
+   * Additional stats that are affected by stages but are not kept track of in a standard stat distribution.
+   * @type {number}
+   */
   #evasion;
   #accuracy;
 
@@ -913,7 +917,113 @@ class Stages extends StatDistribution {
   }
 }
 
+/**
+ * Represents a Pokemon nature that affects the growth of its stats.
+ * @extends StatDistribution
+ */
+class Nature extends StatDistribution {
+  /**
+   * All available natures. The first argument is the stat it boosts by 10% and the second argument is the stat it
+   * hinders by 10%.
+   * @type {Nature}
+   */
+  static HARDY   = new Nature(  'atk',  'atk');
+  static LONELY  = new Nature(  'atk',  'def');
+  static BRAVE   = new Nature(  'atk',  'spe');
+  static ADAMANT = new Nature(  'atk','spAtk');
+  static NAUGHTY = new Nature(  'atk','spDef');
+  static BOLD    = new Nature(  'def',  'atk');
+  static DOCILE  = new Nature(  'def',  'def');
+  static RELAXED = new Nature(  'def',  'spe');
+  static IMPISH  = new Nature(  'def','spAtk');
+  static LAX     = new Nature(  'def','spDef');
+  static TIMID   = new Nature(  'spe',  'atk');
+  static HASTY   = new Nature(  'spe',  'def');
+  static SERIOUS = new Nature(  'spe',  'spe');
+  static JOLLY   = new Nature(  'spe','spAtk');
+  static NAIVE   = new Nature(  'spe','spDef');
+  static MODEST  = new Nature('spAtk',  'atk');
+  static MILD    = new Nature('spAtk',  'def');
+  static QUIET   = new Nature('spAtk',  'spe');
+  static BASHFUL = new Nature('spAtk','spAtk');
+  static RASH    = new Nature('spAtk','spDef');
+  static CALM    = new Nature('spDef',  'atk');
+  static GENTLE  = new Nature('spDef',  'def');
+  static SASSY   = new Nature('spDef',  'spe');
+  static CAREFUL = new Nature('spDef','spAtk');
+  static QUIRKY  = new Nature('spDef','spDef');
 
+  /**
+   * The stat that is boosted by 10%
+   * @type {number}
+   */
+  #boon;
+
+  /**
+   * The stat that is hindered by 10%
+   * @type {number}
+   */
+  #bane;
+
+  /**
+   * Creates a new instance of the Nature class.
+   * @param {string} boon - The stat that gets a 10% increase.
+   * @param {string} bane - The stat that gets a 10% decrease.
+   */
+  constructor(boon, bane) {
+    const base = {hp: 1, atk: 1, def: 1, spAtk: 1, spDef: 1, spe: 1};
+
+    base[boon] += 0.1;
+    base[bane] -= 0.1;
+
+    this.#boon = boon;
+    this.#bane = bane;
+
+    // Nicki Minaj
+    super(base);
+  }
+
+  /**
+   * Returns the name of the stat that is boosted by 10%.
+   * @returns {string}
+   */
+  getBoon() {
+    return this.#boon;
+  }
+
+  /**
+   * Returns the name of the stat that is hindered by 10%.
+   * @returns {string}
+   */
+  getBane() {
+    return this.#bane;
+  }
+
+  // Nature values shouldn't change after initial construction, so setters should effectively do nothing.
+  setHpVal(newVal) {
+    return this;
+  }
+
+  setAtkVal(newVal) {
+    return this;
+  }
+
+  setDefVal(newVal) {
+    return this;
+  }
+
+  setSpAtkVal(newVal) {
+    return this;
+  }
+
+  setSpDefVal(newVal) {
+    return this;
+  }
+
+  setSpeVal(newVal) {
+    return this;
+  }
+}
 
 function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
   const _name = name;
