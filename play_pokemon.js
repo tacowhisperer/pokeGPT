@@ -806,7 +806,8 @@ class Stages extends StatDistribution {
       return 6;
     }
 
-    return statStage;
+    // Stat stages only exist in integers between -6 and 6 inclusive.
+    return Math.floor(statStage);
   }
 
   /**
@@ -825,6 +826,51 @@ class Stages extends StatDistribution {
    */
   getStages() {
     return this.getStats();
+  }
+
+  /**
+   * Gets the current stage values for all stats as multipliers after specifying which generation they are being
+   * applied to.
+   * @param {Gen} gen - The generation that the multipliers are going out to.
+   * @returns {Object} The multipliers for accuracy, evasion, atk, def, spAtk, spDef, and spe as they apply in the
+   *                   specified generation.
+   * @throws {RangeError} If for some reason a non-integer or invalid stage magnitude is encountered.
+   */
+  getMultipliers(gen) {
+    // Gen I has neither accuracy nor evasion stage modifiers, and uses approximated multiplier values
+    if (gen.match('I')) {
+      const genIMults = [0.25, 0.28, 0.33, 0.4, 0.5, 0.66, 1, 1.5, 2, 2.5, 3, 3.5, 4];
+      const {accuracy, evasion, ...stages} = this.getStages();
+
+      for (const stat in stages) {
+        stages[stat] = genIMults[6 + stages[stat]];
+      }
+
+      // Now maps each stat to the multiplier instead of the stage value.
+      return stages;
+    }
+
+    // Gens II+ has accuracy and evasion stage multipliers
+    else {
+      const {evasion, accuracy, ...stages} = this.getStages();
+      const evAcc = {evasion, accuracy};
+
+      // Gens II+ all use ideal multipliers for non-accuracy and non-evasion stats.
+      for (const stat in stages) {
+        stages[stat] = (2 + Math.max(0, stages[stat])) / (2 - Math.min(0, stages[stat]));
+      }
+
+      // Gens II - IV use approximated multiplier values for evasion and accuracy.
+      const mults = [0.33, 0.36, 0.43, 0.5, 0.6, 0.75, 1, 1.33, 1.66, 2, {'II': 2.33, 'III-IV': 2.5}, 2.66, 3];
+      mults[10] = gen.match('II') ? mults[10]['II'] : mults[10]['III-IV'];
+
+      const acc = evAcc.accuracy;
+      const eva = evAcc.evasion;
+      evAcc.accuracy = gen.match('II-IV') ? mults[6 + acc] : (3 + Math.max(0, acc)) / (3 - Math.min(0, acc));
+      evAcc.evasion = gen.match('II-IV') ? mults[6 - eva] : (3 - Math.min(0, stage)) / (3 + Math.max(0, stage));
+
+      return {...evAcc, ...stages};
+    }
   }
 
   /**
@@ -955,13 +1001,13 @@ class Nature extends StatDistribution {
 
   /**
    * The stat that is boosted by 10%
-   * @type {number}
+   * @type {string}
    */
   #boon;
 
   /**
    * The stat that is hindered by 10%
-   * @type {number}
+   * @type {string}
    */
   #bane;
 
@@ -1064,39 +1110,6 @@ rl.question('Name a Pokemon: ', (name) => {
 });
 
 /**
- * Maps the full stat name to its abbreviation.
- * 
- * @param {string} stat - The stat that will be abbreviated.
- * @returns {string} The abbreviation of the stat.
- */
-function abbreviate(stat) {
-  switch (stat.toLowerCase()) {
-    case 'health points':
-    case 'health point':
-    case 'health':
-      return 'hp';
-
-    case 'attack':
-      return 'atk';
-
-    case 'defense':
-      return 'def';
-
-    case 'special attack':
-      return 'sp.atk';
-
-    case 'special defense':
-      return 'sp.def';
-
-    case 'speed':
-      return 'spe';
-
-    default:
-      return stat.toLowerCase();
-  }
-}
-
-/**
  * Calculates the HP stat of a Pokémon based on its base, IV, EV, and level.
  *
  * @param {number} base - The base HP stat of the Pokémon.
@@ -1121,204 +1134,6 @@ function calcHP(base, iv, ev, lv) {
  */
 function calcNonHP(base, iv, ev, lv, nature) {
   return nature * (Math.floor(0.01 * (2 * base + iv + Math.floor(0.25 * ev)) * lv) + 5);
-}
-
-/**
- * Calculates the nature modifier for a given stat and nature combination.
- *
- * @param {string} stat - The stat to calculate the nature modifier for.
- * @param {string} nature - The nature of the Pokémon.
- * @returns {number} The nature modifier for the given stat and nature combination.
- */
-function calcNatureMod(stat, nature) {
-  let increase = '';
-  let decrease = '';
-
-  // Determine the stat that the nature increases and decreases
-  switch (nature) {
-    case 'lonely':
-    case 'adamant':
-    case 'naughty':
-    case 'brave':
-      increase = 'attack';
-      decrease = 'defense';
-      break;
-    case 'bold':
-    case 'impish':
-    case 'lax':
-    case 'relaxed':
-      increase = 'defense';
-      decrease = 'attack';
-      break;
-    case 'timid':
-    case 'hasty':
-    case 'jolly':
-    case 'naive':
-      increase = 'speed';
-      decrease = 'defense';
-      break;
-    case 'modest':
-    case 'mild':
-    case 'quiet':
-    case 'rash':
-      increase = 'special attack';
-      decrease = 'attack';
-      break;
-    case 'calm':
-    case 'gentle':
-    case 'sassy':
-    case 'careful':
-      increase = 'special defense';
-      decrease = 'special attack';
-      break;
-    default:
-      return 1;
-  }
-
-  // Return the nature modifier based on the given stat and nature
-  if (stat.toLowerCase() === increase || stat.toLowerCase() === abbreviate(increase)) {
-    return 1.1;
-  } else if (stat.toLowerCase() === decrease || stat.toLowerCase() === abbreviate(decrease)) {
-    return 0.9;
-  } else {
-    return 1;
-  }
-}
-
-/**
- * Calculates the multiplier for the number of stages a stat has been raised or lowered.
- * 
- * @param {string} stat - The stat being modified.
- * @param {number} stage - An integer [-6, 6] that denotes the stages that the stat has been modified.
- * @param {number} gen=3 - The Pokémon generation that the stat change took place.
- * @returns {number} The corresponding multiplier for the stat.
- */
-function calcStatStageMod(stat, stage, gen = 3) {
-  // Stages and generations only exist in integer values.
-  stage = Math.floor(stage);
-  gen = Math.floor(gen);
-
-  if (stage < -6 || stage > 6) {
-    throw new Error("A stat can only be lowered 6 stages or raised 6 stages.");
-  }
-
-  // Gen 1 uses an approximated multiplier values
-  if (gen === 1) {
-    switch (stage) {
-      case -6:
-        return 0.25;
-      case -5:
-        return 0.28;
-      case -4:
-        return 0.33;
-      case -3:
-        return 0.4;
-      case -2:
-        return 0.5;
-      case -1:
-        return 0.66;
-      case 0:
-        return 1;
-      case 1:
-        return 1.5;
-      case 2:
-        return 2;
-      case 3:
-        return 2.5;
-      case 4:
-        return 3;
-      case 5:
-        return 3.5;
-      case 6:
-        return 4;
-      default:
-        throw new Error(`Impossible stage reached. Got ${stage}.`);
-    }
-  }
-
-  switch (stat.toLowerCase()) {
-    case "acc":
-    case "accuracy":
-      if (gen >= 5) {
-        return (3 + Math.max(0, stage)) / (3 - Math.min(0, stage));
-      } else if (gen >= 2 && gen <= 4) {
-        // Gens II - IV use approximated multiplier values.
-        switch (stage) {
-          case -6:
-            return 0.33;
-          case -5:
-            return 0.36;
-          case -4:
-            return 0.43;
-          case -3:
-            return 0.5;
-          case -2:
-            return 0.6;
-          case -1:
-            return 0.75;
-          case 0:
-            return 1;
-          case 1:
-            return 1.33;
-          case 2:
-            return 1.66;
-          case 3:
-            return 2;
-          case 4:
-            return gen === 2 ? 2.33 : 2.5;
-          case 5:
-            return 2.66;
-          case 6:
-            return 3;
-          default:
-            throw new Error(`Impossible stage reached. Got ${stage}.`);
-        }
-      }
-      break;
-
-    case "eva":
-    case "evsn":
-    case "evasion":
-      if (gen >= 5) {
-        return (3 - Math.min(0, stage)) / (3 + Math.max(0, stage));
-      } else if (gen >= 2 && gen <= 4) {
-        // Gens II - IV use approximated mutiplier values.
-        switch (stage) {
-          case -6:
-            return 3;
-          case -5:
-            return 2.66;
-          case -4:
-            return gen === 2 ? 2.33 : 2.5;
-          case -3:
-            return 2;
-          case -2:
-            return 1.66;
-          case -1:
-            return 1.33;
-          case 0:
-            return 1;
-          case 1:
-            return 0.75;
-          case 2:
-            return 0.6;
-          case 3:
-            return 0.5;
-          case 4:
-            return 0.43;
-          case 5:
-            return 0.36;
-          case 6:
-            return 0.33;
-          default:
-            throw new Error(`Impossible stage reached. Got ${stage}.`);
-        }
-      }
-      break;
-
-    default:
-      return (2 + Math.max(0, stage)) / (2 - Math.min(0, stage));
-  }
 }
 
 /**
