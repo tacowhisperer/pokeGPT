@@ -867,7 +867,7 @@ class Stages extends StatDistribution {
       const acc = evAcc.accuracy;
       const eva = evAcc.evasion;
       evAcc.accuracy = gen.match('II-IV') ? mults[6 + acc] : (3 + Math.max(0, acc)) / (3 - Math.min(0, acc));
-      evAcc.evasion = gen.match('II-IV') ? mults[6 - eva] : (3 - Math.min(0, stage)) / (3 + Math.max(0, stage));
+      evAcc.evasion = gen.match('II-IV') ? mults[6 - eva] : (3 - Math.min(0, eva)) / (3 + Math.max(0, eva));
 
       return {...evAcc, ...stages};
     }
