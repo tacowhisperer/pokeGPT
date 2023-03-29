@@ -2,6 +2,38 @@ const fs = require('fs');
 const readline = require('readline');
 
 /**
+ * An error thrown when an assertion fails.
+ * @class AssertionError
+ * @extends Error
+ * @param {string} message - The error message.
+ */
+class AssertionError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'AssertionError';
+  }
+}
+
+/**
+ * Asserts that the output of the test function equals the expected output.
+ * @param {() => any} testOutputOf - A factory function that produces the output to be tested.
+ * @param {*} expected - The expected output.
+ * @param {(a: any, b: any) => boolean} [equalsFn=(a, b) => a === b] - A function that takes two arguments
+ * and returns true if they are equal, false otherwise. Defaults to strict equality (===).
+ * @throws {AssertionError} If the test fails.
+ * @throws {TypeError} If `equalsFn` is not a function.
+ * @throws {AssertionError} If the output of the test function does not equal the expected output.
+ * @note The output of `testOutputOf` and the `expected` Object should have well-defined `toString` methods for useful
+ *       assertion error messages.
+ */
+function assertEqual(testOutputOf, expected, equalsFn = (a, b) => a === b) {
+  const output = testOutputOf();
+  if (!equalsFn(output, expected)) {
+    throw new AssertionError(`Expected ${expected}, but got ${output}.`);
+  }
+}
+
+/**
  * Finds the name of the property on the given function that refers to the given instance.
  *
  * @param {*} instance - The instance to search for.
