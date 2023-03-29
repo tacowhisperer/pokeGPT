@@ -1098,6 +1098,12 @@ class Nature extends StatDistribution {
 }
 
 // TODO: Implement this
+class Status {}
+
+// TODO: Implement this
+class VolatileStatus extends Status {}
+
+// TODO: Implement this
 class Item {}
 
 // TODO: Implement this
@@ -1106,12 +1112,44 @@ class Move {}
 // TODO: Implement this
 class Ability {}
 
+// TODO: Finish this
 class Pokemon {
-  constructor(name, data, gen, evs = EVs.ZERO(), ivs = IVs.ZERO(), stages = Stages.ZERO()) {
+  #name;
+  #stats;
 
+  #type1;
+  #type2;
+
+  #gen;
+
+  #evs;
+  #ivs;
+
+  #currentHP;
+
+  #nonVolatileStatus;
+  #volatileStatus;
+
+  #stages = Stages.ZERO();
+
+  constructor(name, data, gen, evs = EVs.ZERO(), ivs = IVs.ZERO()) {
+    this.#name = name;
+    this.#stats = new StatDistribution(data);
+
+    [this.#type1, this.#type2 = Type.undefined] = data.abilities;
+
+    this.#gen = gen;
+
+    this.#evs = evs;
+    this.#ivs = ivs;
+
+    this.#currentHP = data.hp;
   }
+
+  // TODO: Add more methods here.
 }
 
+// TODO: Delete this when no longer needed
 function Pokemon({name, teraType = Type.TYPELESS, ivs}) {
   const _name = name;
 
