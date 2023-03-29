@@ -524,6 +524,8 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
  * @throws {RangeError} If any individual stat has a value less than 0 or greater than 252, or if the total sum of EVs exceeds 510.
  */
 class EVs extends StatDistribution {
+  static ZERO = () => new EVs({});
+
   constructor({ hp = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0 }) {
     const stats = { hp, atk, def, spAtk, spDef, spe };
     for (let ev in stats) {
@@ -658,6 +660,8 @@ class EVs extends StatDistribution {
  * @param {number} [stats.spe=0] - The IV for the Speed stat.
  */
 class IVs extends StatDistribution {
+  static ZERO = () => new IVs({});
+
   constructor({hp = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
     const stats = { hp, atk, def, spAtk, spDef, spe };
     for (let iv in stats) {
@@ -771,6 +775,8 @@ class IVs extends StatDistribution {
  * @param {number} [stats.spe=0] - The stage for the Speed stat.
  */
 class Stages extends StatDistribution {
+  static ZERO = () => new Stages({});
+
   /**
    * Additional stats that are affected by stages but are not kept track of in a standard stat distribution.
    * @type {number}
@@ -882,12 +888,32 @@ class Stages extends StatDistribution {
   };
 
   /**
+   * Set the Evasion stage value.
+   * @param {number} newVal - The new evasion stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setEvasionVal = function(newVal) {
+    this.#evasion = this.#checkStage("evasion", newVal);
+    return this;
+  };
+
+  /**
    * Get the current Accuracy stat stage.
    * @returns {number} The current Accuracy stat stage.
    */
   getAccuracyVal() {
     return this.#accuracy;
   }
+
+  /**
+   * Set the Accuracy stage value.
+   * @param {number} newVal - The new accuracy stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setAccuracyVal = function(newVal) {
+    this.#accuracy = this.#checkStage("accuracy", newVal);
+    return this;
+  };
 
   /**
    * The HP stat does not have a valid stage or multiplied by stages.
@@ -964,7 +990,7 @@ class Stages extends StatDistribution {
 }
 
 /**
- * Represents a Pokemon nature that affects the growth of its stats.
+ * Represents a Pokemon nature that affects the final value of some of its stats.
  * @extends StatDistribution
  */
 class Nature extends StatDistribution {
@@ -1068,6 +1094,21 @@ class Nature extends StatDistribution {
 
   setSpeVal(newVal) {
     return this;
+  }
+}
+
+// TODO: Implement this
+class Item {}
+
+// TODO: Implement this
+class Move {}
+
+// TODO: Implement this
+class Ability {}
+
+class Pokemon {
+  constructor(name, data, gen, evs = EVs.ZERO(), ivs = IVs.ZERO(), stages = Stages.ZERO()) {
+
   }
 }
 
