@@ -1191,29 +1191,146 @@ class VolatileStatus extends Status {}
 // TODO: Implement this
 class Item {}
 
-// TODO: Implement this
-class Move {}
+/**
+ * Represents a move in a Pokémon game.
+ *
+ * @class
+ */
+class Move {
+  /**
+   * The physical move category.
+   *
+   * @static
+   * @type {Move}
+   */
+  static PHYSICAL = new Move();
+
+  /**
+   * The special move category.
+   *
+   * @static
+   * @type {Move}
+   */
+  static SPECIAL = new Move();
+
+  /**
+   * The status move category.
+   *
+   * @static
+   * @type {Move}
+   */
+  static STATUS = new Move();
+
+  /**
+   * Creates a new instance of the `Move` class.
+   *
+   * @constructor
+   * @param {string} [name] - The name of the move.
+   * @param {number} [power] - The power of the move.
+   * @param {number} [accuracy] - The accuracy of the move.
+   * @param {Move} [cat] - The category of the move.
+   * @param {boolean} [isHM=false] - Indicates whether the move is an HM move.
+   * @throws {TypeError} If the category is not one of `Move.PHYSICAL`, `Move.SPECIAL`, or `Move.STATUS`.
+   */
+  constructor(name, power, accuracy, cat, isHM = false) {
+    // This is only called by the Move class when initiating the 3 static categories of moves
+    if (arguments.length === 0) {
+      // do nothing
+    } else {
+      this.#name = name;
+      this.#power = power;
+      this.#accuracy = accuracy;
+      
+      this.#category = this.#checkCategory(cat, Move.PHYSICAL) ||
+        this.#checkCategory(cat, Move.SPECIAL) ||
+        this.#checkCategory(cat, Move.STATUS);
+      if (!this.#category) {
+        throw new TypeError(`The category must be one of Move.PHYSICAL, Move.SPECIAL, or Move.STATUS`);
+      }
+
+      this.#isHM = isHM;
+    }
+  }
+
+  /**
+   * Checks if the incoming category is one of the static instances defined in the Move class.
+   *
+   * @private
+   * @param {*} [cat] - The category object to be checked
+   * @param {Move} [category] - One of Move.PHYSICAL, Move.SPECIAL, or Move.STATUS
+   * @returns {*} The static instance if the condition is met, false otherwise.
+   */
+  #checkCategory(cat, category) {
+    return cat === category ? cat : false;
+  }
+
+  /**
+   * Returns the name of the move.
+   *
+   * @returns {string} The name of the move.
+   */
+  getName() {
+    return this.#name;
+  }
+
+  /**
+   * Returns the power of the move.
+   *
+   * @returns {number} The power of the move.
+   */
+  getPower() {
+    return this.#power;
+  }
+
+  /**
+   * Returns the accuracy of the move.
+   *
+   * @returns {number} The accuracy of the move.
+   */
+  getAccuracy() {
+    return this.#accuracy;
+  }
+
+  /**
+   * Indicates whether the move is an HM move.
+   *
+   * @returns {boolean} `true` if the move is an HM move, `false` otherwise.
+   */
+  isHM() {
+    return this.#isHM;
+  }
+
+  /**
+   * Returns the name of the move as a string.
+   *
+   * @returns {string} The name of the move.
+   */
+  toString() {
+    return this.getName();
+  }
+}
+
 
 // TODO: Implement this
 class Ability {}
 
 // TODO: Finish this
 class Pokemon {
+  // Data that stays with the mon even outside of battle
   #name;
-  #stats;
-
+  #nickname;
+  #ability;
   #type1;
   #type2;
-
-  #gen;
-
+  #stats;
   #evs;
   #ivs;
-
+  #friendship;
+  #statusCondition;
   #currentHP;
+  #moves;
 
-  #nonVolatileStatus;
-  #volatileStatus;
+  #gen;
 
   #stages = Stages.ZERO();
 
