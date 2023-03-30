@@ -813,49 +813,53 @@ class Stages extends StatDistribution {
    * Additional stats that are affected by stages but are not kept track of in a standard stat distribution.
    * @type {number}
    */
+  #critRatio // Only ranges from 0 to 4
   #evasion;
   #accuracy;
 
-  constructor({evasion = 0, accuracy = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
+  constructor({critRatio = 0, evasion = 0, accuracy = 0, atk = 0, def = 0, spAtk = 0, spDef = 0, spe = 0}) {
     const stats = { atk, def, spAtk, spDef, spe };
     for (let stage in stats) {
       stats[stage] = this.#checkStage(stage, stats[stage]);
     }
 
-    this.#evasion = evasion;
-    this.#accuracy = accuracy;
+    this.#critRatio = this.#checkStage("critRatio", critRatio, 0, 4);
+    this.#evasion = this.#checkStage("evasion", evasion);
+    this.#accuracy = this.#checkStage("accuracy", accuracy);
     super(stats);
   }
 
   /**
-   * Checks a stat's stage to ensure it falls within the valid range of -6 to 6. If it falls outside this
-   * range, a warning message is logged to the console and the value is set to the nearest valid value.
+   * Checks a stat's stage to ensure it falls within the valid range (most stages range from -6 to 6). If it falls
+   * outside this range, a warning message is logged to the console and the value is set to the nearest valid value.
    * @private
    * @param {string} stat - The name of the stat being checked (e.g. "hp", "atk", "def", etc.).
    * @param {number} statStage - The value of the stage being checked.
-   * @returns {number} The valid stage value (i.e. a value between -6 and 6, inclusive).
+   * @param {number} [min=-6] - The smallest valid stage value for the given stat.
+   * @param {number} [max=6] - The largest valid stage value for the given stat.
+   * @returns {number} The valid stage value (i.e. a value between min and max, inclusive).
    */
-  #checkStage(stat, statStage) {
-    if (statStage < -6) {
-      console.warn(`The "${stat}" stage is less than -6. Its value will be set to -6.`);
-      return -6;
-    } else if (statStage > 6) {
-      console.warn(`The "${stat}" stage is greater than 6. Its value will be set to 6.`);
-      return 6;
+  #checkStage(stat, statStage, min = -6, max = 6) {
+    if (statStage < min) {
+      console.warn(`The "${stat}" stage is less than ${min}. Its value will be set to ${min}.`);
+      return min;
+    } else if (statStage > max) {
+      console.warn(`The "${stat}" stage is greater than ${max}. Its value will be set to ${max}.`);
+      return max;
     }
 
-    // Stat stages only exist in integers between -6 and 6 inclusive.
+    // Stat stages only exist in integers.
     return Math.floor(statStage);
   }
 
   /**
    * Gets the current stage values for all stats which have stages in battle.
-   * @returns {Object} The stages for accuracy, evasion, atk, def, spAtk, spDef, and spe.
+   * @returns {Object} The stages for critRatio, accuracy, evasion, atk, def, spAtk, spDef, and spe.
    */
   getStats() {
     const {hp, ...rest} = super.getStats();
 
-    return {...rest, evasion: this.getEvasionVal(), accuracy: this.getAccuracyVal()};
+    return {...rest, critRatio: this.getCritRatioVal(), evasion: this.getEvasionVal(), accuracy: this.getAccuracyVal()};
   }
 
   /**
@@ -875,10 +879,10 @@ class Stages extends StatDistribution {
    * @throws {RangeError} If for some reason a non-integer or invalid stage magnitude is encountered.
    */
   getMultipliers(gen) {
-    // Gen I has neither accuracy nor evasion stage modifiers, and uses approximated multiplier values
+    // Gen I doesn't have critRatio, accuracy, and evasion stage modifiers, and uses approximated multiplier values
     if (gen.match('I')) {
       const genIMults = [0.25, 0.28, 0.33, 0.4, 0.5, 0.66, 1, 1.5, 2, 2.5, 3, 3.5, 4];
-      const {accuracy, evasion, ...stages} = this.getStages();
+      const {critRatio, accuracy, evasion, ...stages} = this.getStages();
 
       for (const stat in stages) {
         stages[stat] = genIMults[6 + stages[stat]];
@@ -888,9 +892,9 @@ class Stages extends StatDistribution {
       return stages;
     }
 
-    // Gens II+ has accuracy and evasion stage multipliers
+    // Gens II+
     else {
-      const {evasion, accuracy, ...stages} = this.getStages();
+      let {critRatio, evasion, accuracy, ...stages} = this.getStages();
       const evAcc = {evasion, accuracy};
 
       // Gens II+ all use ideal multipliers for non-accuracy and non-evasion stats.
@@ -907,9 +911,41 @@ class Stages extends StatDistribution {
       evAcc.accuracy = gen.match('II-IV') ? mults[6 + acc] : (3 + Math.max(0, acc)) / (3 - Math.min(0, acc));
       evAcc.evasion = gen.match('II-IV') ? mults[6 - eva] : (3 - Math.min(0, eva)) / (3 + Math.max(0, eva));
 
-      return {...evAcc, ...stages};
+      // Probabilities of a critical hit in each generation
+      const critMap = {
+        "II": [17/256, 1/8, 1/4, 85/256, 1/2],
+        "III-V": [1/16, 1/8, 1/4, 1/3, 1/2],
+        "VI": [1/16, 1/8, 1/2, 1, 1],
+        "VII+": [1/24, 1/8, 1/2, 1, 1]
+      };
+      for (genRange in critMap) {
+        if (gen.match(genRange)) {
+          critRatio = critMap[genRange][critRatio];
+          break;
+        }
+      }
+
+      return {critRatio, ...evAcc, ...stages};
     }
   }
+
+  /**
+   * Get the current Critical Hit Ratio stat stage.
+   * @returns {number} The current Critical Hit Ratio stat stage.
+   */
+  getCritRatioVal() {
+    return this.#critRatio;
+  };
+
+  /**
+   * Set the Critical Hit Ratio stage value.
+   * @param {number} newVal - The new critRatio stage value.
+   * @returns {Stages} This object, allowing for method chaining.
+   */
+  setCritRatioVal(newVal) {
+    this.#critRatio = this.#checkStage("critRatio", newVal, 0, 4);
+    return this;
+  };
 
   /**
    * Get the current Evasion stat stage.
@@ -924,7 +960,7 @@ class Stages extends StatDistribution {
    * @param {number} newVal - The new evasion stage value.
    * @returns {Stages} This object, allowing for method chaining.
    */
-  setEvasionVal = function(newVal) {
+  setEvasionVal(newVal) {
     this.#evasion = this.#checkStage("evasion", newVal);
     return this;
   };
@@ -942,7 +978,7 @@ class Stages extends StatDistribution {
    * @param {number} newVal - The new accuracy stage value.
    * @returns {Stages} This object, allowing for method chaining.
    */
-  setAccuracyVal = function(newVal) {
+  setAccuracyVal(newVal) {
     this.#accuracy = this.#checkStage("accuracy", newVal);
     return this;
   };
