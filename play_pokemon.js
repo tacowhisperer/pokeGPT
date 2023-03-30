@@ -541,6 +541,23 @@ function StatDistribution({hp = 0, atk = 0, def = 0, "sp.atk": spAtk = 0, "sp.de
 }
 
 /**
+ * Custom error class for invalid Pokémon EV sum.
+ * @class
+ * @extends Error
+ */
+class EVSumError extends Error {
+  /**
+   * Create a new instance of EVSumError.
+   * @param {string} message - The error message.
+   */
+  constructor(message) {
+    super(message);
+    this.name = "EVSumError";
+  }
+}
+
+
+/**
  * Creates an object representing the distribution of effort values (EVs) of a Pokémon.
  * Effort values represent a Pokemon's training and are typically gained after defeating enemy Pokemon.
  * 
@@ -603,7 +620,7 @@ class EVs extends StatDistribution {
       evTotal += evs[ev];
     }
     if (evTotal > 510) {
-      throw new RangeError(`The total sum of EVs may not exceed 510. Got ${evTotal}.`);
+      throw new EVSumError(`The total sum of EVs may not exceed 510. Got ${evTotal}.`);
     }
 
     return this;
