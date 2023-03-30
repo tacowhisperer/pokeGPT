@@ -1230,11 +1230,12 @@ class Move {
    * @param {number} [power] - The power of the move.
    * @param {number} [accuracy] - The accuracy of the move.
    * @param {Move} [cat] - The category of the move.
+   * @param {number} [pp] - The base number of power points the move has.
    * @param {boolean} [isHM=false] - Indicates whether the move is an HM move.
    * @throws {TypeError} If the category is not one of `Move.PHYSICAL`, `Move.SPECIAL`, or `Move.STATUS`, or if the
    * type is note one of the 19 well-defined types of Type.
    */
-  constructor(name, type, power, accuracy, cat, isHM = false) {
+  constructor(name, type, power, accuracy, cat, pp, isHM = false) {
     // This is only called by the Move class when initiating the 3 static categories of moves
     if (arguments.length === 0) {
       // do nothing
@@ -1255,6 +1256,7 @@ class Move {
         throw new TypeError(`The category must be one of Move.PHYSICAL, Move.SPECIAL, or Move.STATUS`);
       }
 
+      this.#pp = pp;
       this.#isHM = isHM;
     }
   }
@@ -1305,6 +1307,24 @@ class Move {
    */
   getAccuracy() {
     return this.#accuracy;
+  }
+
+  /**
+   * Returns the category of the move.
+   * 
+   * @returns {Move} The category of the move (one of Move.PHYSICAL, Move.SPECIAL, or Move.STATUS).
+   */
+  getCategory() {
+    return this.#category;
+  }
+
+  /**
+   * Returns the base number of power points of the move.
+   * 
+   * @returns {number} The base number of PP that a move has.
+   */
+  getPP() {
+    return this.#pp;
   }
 
   /**
