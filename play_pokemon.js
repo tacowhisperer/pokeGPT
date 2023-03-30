@@ -1226,18 +1226,25 @@ class Move {
    *
    * @constructor
    * @param {string} [name] - The name of the move.
+   * @param {Type} [type] - The type of the move.
    * @param {number} [power] - The power of the move.
    * @param {number} [accuracy] - The accuracy of the move.
    * @param {Move} [cat] - The category of the move.
    * @param {boolean} [isHM=false] - Indicates whether the move is an HM move.
-   * @throws {TypeError} If the category is not one of `Move.PHYSICAL`, `Move.SPECIAL`, or `Move.STATUS`.
+   * @throws {TypeError} If the category is not one of `Move.PHYSICAL`, `Move.SPECIAL`, or `Move.STATUS`, or if the
+   * type is note one of the 19 well-defined types of Type.
    */
-  constructor(name, power, accuracy, cat, isHM = false) {
+  constructor(name, type, power, accuracy, cat, isHM = false) {
     // This is only called by the Move class when initiating the 3 static categories of moves
     if (arguments.length === 0) {
       // do nothing
     } else {
       this.#name = name;
+      if (!(type instanceof Type)) {
+        throw new TypeError(`The move type must be an instance of the Type class.`);
+      }
+      this.#type = type;
+
       this.#power = power;
       this.#accuracy = accuracy;
       
@@ -1271,6 +1278,15 @@ class Move {
    */
   getName() {
     return this.#name;
+  }
+
+  /**
+   * Returns the type of the move.
+   *
+   * @returns {Type} The type of the move as an instace of the Type class.
+   */
+  getType() {
+    return this.#type;
   }
 
   /**
