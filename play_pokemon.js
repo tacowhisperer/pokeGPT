@@ -1231,11 +1231,12 @@ class Move {
    * @param {number} [accuracy] - The accuracy of the move.
    * @param {Move} [cat] - The category of the move.
    * @param {number} [pp] - The base number of power points the move has.
+   * @param {number} [priority] - The priority that the move has. Most moves have priority 0, but can range from -7 to 5
    * @param {boolean} [isHM=false] - Indicates whether the move is an HM move.
    * @throws {TypeError} If the category is not one of `Move.PHYSICAL`, `Move.SPECIAL`, or `Move.STATUS`, or if the
    * type is note one of the 19 well-defined types of Type.
    */
-  constructor(name, type, power, accuracy, cat, pp, isHM = false) {
+  constructor(name, type, power, accuracy, cat, pp, priority = 0, isHM = false) {
     // This is only called by the Move class when initiating the 3 static categories of moves
     if (arguments.length === 0) {
       // do nothing
@@ -1257,6 +1258,10 @@ class Move {
       }
 
       this.#pp = pp;
+      this.#priority = Math.floor(priority) < -7 ? -7 : Math.floor(priority) > 5 ? 5 : Math.floor(priority);
+      if (priority !== this.#priority) {
+        console.warn(`The priority value given was modified from (${priority}) to (${this.#priority})!`);
+      }
       this.#isHM = isHM;
     }
   }
@@ -1325,6 +1330,15 @@ class Move {
    */
   getPP() {
     return this.#pp;
+  }
+
+  /**
+   * Returns the priority of the move.
+   * 
+   * @returns {number} The priority of this move, an integer from -7 to 5 inclusive.
+   */
+  getPriority() {
+    return this.#priority;
   }
 
   /**
