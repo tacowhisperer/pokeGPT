@@ -570,7 +570,7 @@ class EVSumError extends Error {
  * @param {number} stats.spAtk - The EVs for Special Attack.
  * @param {number} stats.spDef - The EVs for Special Defense.
  * @param {number} stats.spe - The EVs for Speed.
- * @throws {RangeError} If any individual stat has a value less than 0 or greater than 252, or if the total sum of EVs exceeds 510.
+ * @throws {EVSumError} If the total sum of EVs exceeds 510.
  */
 class EVs extends StatDistribution {
   static ZERO = () => new EVs({});
@@ -815,6 +815,7 @@ class IVs extends StatDistribution {
  * @augments StatDistribution
  * @param {Object} stats - An object with properties for each of the 7 stats that have stages.
  *                         Missing values default to 0.
+ * @param {number} [stats.critRatio=0] - The stage for the critical hit ratio. Ranges from 0 to 4 (inclusive).
  * @param {number} [stats.evasion=0] - The stage for the evasion stat.
  * @param {number} [stats.accuracy=0] - The stage for the accuracy stat.
  * @param {number} [stats.atk=0] - The stage for the Attack stat.
@@ -905,7 +906,6 @@ class Stages extends StatDistribution {
         stages[stat] = genIMults[6 + stages[stat]];
       }
 
-      // Now maps each stat to the multiplier instead of the stage value.
       return stages;
     }
 
