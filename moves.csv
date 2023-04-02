@@ -1,4 +1,4 @@
-#,Name,Type,Category,PP,Power,Accuracy,Gen,Priority,Contact,Usage
+#,name,type,category,pp,power,accuracy,gen,priority,contact,usage
 1,Pound,Normal,Physical,35,40,100%,I,0,true,""
 2,Karate Chop,Fighting,Physical,25,50,100%,I,0,true,""
 3,Double Slap,Normal,Physical,10,15,85%,I,0,true,""
