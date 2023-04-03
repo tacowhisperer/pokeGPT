@@ -1,4 +1,5 @@
 const fs = require('fs');
+const readline = require('readline');
 
 /**
  * Read the contents of a file and return each line as an array element.
@@ -76,4 +77,119 @@ function combineData(output) {
   fs.appendFileSync(output, '\n}');
 }
 
-combineData('m_pokedex.json');
+// function csvToJson(inputFile, outputFile, primaryKey) {
+//   // Create a readable stream to read from the input file
+//   const inputStream = fs.createReadStream(inputFile, 'utf-8');
+
+//   // Create a writable stream to write to the output file
+//   const outputStream = fs.createWriteStream(outputFile);
+
+//   // Create an interface for reading lines from the input stream
+//   const reader = readline.createInterface({ input: inputStream });
+
+//   // Initialize the header to null
+//   let header = null;
+
+//   // Initialize the data object to an empty object
+//   const data = {};
+
+//   // Listen for the 'line' event emitted by the reader for each line in the input stream
+//   reader.on('line', (line) => {
+//     // Split the line into an array of columns using a comma delimiter
+//     const row = line.split(',').map((col) => {
+//       // Handle quoted columns by removing the quotes
+//       if (col.startsWith('"') && col.endsWith('"')) {
+//         return col.slice(1, -1);
+//       }
+//       return col;
+//     });
+
+//     // If the header has not yet been initialized, set it to the current row
+//     if (header === null) {
+//       header = row;
+//       return;
+//     }
+
+//     // Initialize an entry object for the current row
+//     const entry = {};
+
+//     // Iterate through each column in the row
+//     for (let i = 0; i < header.length; i++) {
+//       // If the column name matches the primary key, use the column value as the key in the data object
+//       if (header[i] === primaryKey) {
+//         data[row[i]] = entry;
+//       } else {
+//         // Otherwise, add the column name and value as a property in the entry object
+//         entry[header[i]] = row[i];
+//       }
+//     }
+//   });
+
+//   // Listen for the 'close' event emitted by the reader when it has finished reading all lines
+//   reader.on('close', () => {
+//     // Write the data object to the output stream as a string with pretty formatting
+//     outputStream.write(JSON.stringify(data, null, 2));
+
+//     // End the output stream to signal that no more data will be written
+//     outputStream.end();
+//   });
+// }
+
+function csvToJson(inputFile, outputFile, primaryKey) {
+  const inputStream = fs.createReadStream(inputFile, 'utf-8');
+  const outputStream = fs.createWriteStream(outputFile);
+
+  const reader = readline.createInterface({ input: inputStream });
+  let header = null;
+  const data = {};
+
+  reader.on('line', (line) => {
+    const row = [];
+    let currentCol = '';
+    let insideQuotes = false;
+
+    // Split the line into columns, handling quotes
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === ',' && !insideQuotes) {
+        row.push(currentCol);
+        currentCol = '';
+      } else {
+        if (line[i] === '"') {
+          insideQuotes = !insideQuotes;
+        }
+        currentCol += line[i];
+      }
+    }
+    row.push(currentCol);
+
+    // Remove quotes from each column
+    const rowWithoutQuotes = row.map((col) => {
+      if (col.startsWith('"') && col.endsWith('"')) {
+        return col.slice(1, -1);
+      }
+      return col;
+    });
+
+    if (header === null) {
+      header = rowWithoutQuotes;
+      return;
+    }
+
+    const entry = {};
+    for (let i = 0; i < header.length; i++) {
+      if (header[i] === primaryKey) {
+        data[rowWithoutQuotes[i]] = entry;
+      } else {
+        entry[header[i]] = rowWithoutQuotes[i];
+      }
+    }
+  });
+
+  reader.on('close', () => {
+    outputStream.write(JSON.stringify(data, null, 2));
+    outputStream.end();
+  });
+}
+
+// combineData('m_pokedex.json');
+csvToJson('moves.csv', 'moves.json', 'name');

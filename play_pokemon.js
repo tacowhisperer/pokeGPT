@@ -258,6 +258,19 @@ Object.freeze(Weather.prototype);
 Object.freeze(Weather);
 
 /**
+ * An error thrown when an invalid generation of Pokemon is specified.
+ * @class GenerationError
+ * @extends Error
+ * @param {string} message - The error message.
+ */
+class GenerationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'GenerationError';
+  }
+}
+
+/**
  * Represents a Pokemon type.
  * @class
  */
@@ -275,11 +288,55 @@ function Type() {
   const _id = __static__++;
 
   /**
-   * A mapping of effectiveness values for each type against this type.
+   * A mapping of effectiveness values for each type against this type in Gen I
+   */
+  const _genIEff = {
+    [Type.NORMAL]: {},
+    [Type.FIRE]: {},
+    [Type.WATER]: {},
+    [Type.ELECTRIC]: {},
+    [Type.GRASS]: {},
+    [Type.ICE]: {},
+    [Type.FIGHTING]: {},
+    [Type.POISON]: {},
+    [Type.GROUND]: {},
+    [Type.FLYING]: {},
+    [Type.PSYCHIC]: {},
+    [Type.BUG]: {},
+    [Type.ROCK]: {},
+    [Type.GHOST]: {},
+    [Type.DRAGON]: {}
+  };
+
+  /**
+   * A mapping of effectiveness values for each type against this type in gens II-V
+   */
+  const _genIItoVEff = {
+    [Type.NORMAL]: {},
+    [Type.FIRE]: {},
+    [Type.WATER]: {},
+    [Type.ELECTRIC]: {},
+    [Type.GRASS]: {},
+    [Type.ICE]: {},
+    [Type.FIGHTING]: {},
+    [Type.POISON]: {},
+    [Type.GROUND]: {},
+    [Type.FLYING]: {},
+    [Type.PSYCHIC]: {},
+    [Type.BUG]: {},
+    [Type.ROCK]: {},
+    [Type.GHOST]: {},
+    [Type.DRAGON]: {},
+    [Type.DARK]: {},
+    [Type.STEEL]: {}
+  };
+
+  /**
+   * A mapping of effectiveness values for each type against this type from Gen VI+
    * @private
    * @type {Object.<string, Object.<string, number>>}
    */
-  const _effectiveness = {
+  const _genVIEff = {
     [Type.BUG]: { [Type.FIGHTING]: 0.5, [Type.FLYING]: 2, [Type.GROUND]: 0.5, [Type.ROCK]: 2, [Type.FIRE]: 2, [Type.GRASS]: 0.5 },
     [Type.DARK]: { [Type.FIGHTING]: 2, [Type.PSYCHIC]: 0, [Type.BUG]: 2, [Type.GHOST]: 0.5, [Type.DARK]: 0.5, [Type.FAIRY]: 2 },
     [Type.DRAGON]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.DRAGON]: 2, [Type.FAIRY]: 2 },
@@ -316,22 +373,26 @@ function Type() {
   /**
    * Performs an attack with a defender type and optional secondary defender type.
    * Calculates the attack modifier based on the effectiveness of the attack type against the defender type(s).
+   * @param {Gen} gen - The generation that the attack is taking place.
    * @param {Type} fDefenderType - The primary defender type.
    * @param {Type} [sDefenderType=Type.TYPELESS] - The optional secondary defender type.
    * @throws {TypeError} If either defender type is not an instance of the Type function.
    * @returns {number} The calculated attack modifier.
    */
-  this.attack = function(fDefenderType, sDefenderType = Type.TYPELESS) {
+  this.attack = function(gen, fDefenderType, sDefenderType = Type.TYPELESS) {
+    if (!(gen instanceof Gen))
+      throw new GenerationError("Invalid generation object specified for an attack (must be one of Gen.I to Gen.IX)");
+
     if (!(fDefenderType instanceof Type) || !(sDefenderType instanceof Type))
       throw new TypeError("Defender types must be instances of the Type function");
 
     let mod = 1;
-    if (_effectiveness.hasOwnProperty(fDefenderType) && _effectiveness[fDefenderType].hasOwnProperty(this)) {
-      mod *= _effectiveness[fDefenderType][this];
+    if (_genVIEff.hasOwnProperty(fDefenderType) && _genVIEff[fDefenderType].hasOwnProperty(this)) {
+      mod *= _genVIEff[fDefenderType][this];
     }
 
-    if (_effectiveness.hasOwnProperty(sDefenderType) && _effectiveness[sDefenderType].hasOwnProperty(this)) {
-      mod *= _effectiveness[sDefenderType][this];
+    if (_genVIEff.hasOwnProperty(sDefenderType) && _genVIEff[sDefenderType].hasOwnProperty(this)) {
+      mod *= _genVIEff[sDefenderType][this];
     }
 
     return mod;
