@@ -234,6 +234,41 @@ function Weather() {
    */
   const _id = __static__++;
 
+  /**
+   * A mapping of power multipliers for power-modifying weathers and the type's whose powers are modified.
+   * @private
+   * @type {Object.<string, Object.<string, number>>}
+   */
+  const _powerModWeather = {
+    [Weather.HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0.5 },
+    [Weather.EXTREMELY_HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0 },
+    [Weather.RAIN]: { [Type.FIRE]: 0.5, [Type.WATER]: 1.5 },
+    [Weather.HEAVY_RAIN]: { [Type.FIRE]: 0, [Type.WATER]: 1.5 }
+  };
+
+  this.encompass = function(attackType) {
+    
+  };
+
+  /**
+   * Calculates the effectiveness of this type in a given weather condition.
+   * @method
+   * @param {Weather} weather - The weather condition to calculate the effectiveness of this type against.
+   * @throws {TypeError} Throws an error if the input weather is not an instance of the Weather function.
+   * @returns {number} The effectiveness of this type against the given weather condition. Returns 1 if the weather condition does not affect this type or if this type is not affected by weather.
+   */
+  this.attackThrough = function(weather) {
+    if (!(weather instanceof Weather))
+      throw new TypeError("Weather must in an instance of the Weather function");
+
+    if (_weather.hasOwnProperty(weather) && _weather[weather].hasOwnProperty(this)) {
+      return _weather[weather][this];
+    }
+
+    // Either the weather doesn't affect the power of moves or this type isn't affected by the weather.
+    return 1;
+  };
+
   this.toString = function() {
     return `${_id}`;
   };
@@ -363,17 +398,7 @@ function Type() {
     [Type.WATER]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.GRASS]: 2, [Type.ELECTRIC]: 2, [Type.ICE]: 0.5, [Type.STEEL]: 0.5 }
   };
 
-  /**
-   * A mapping of power multipliers for power-modifying weathers and the type's whose powers are modified.
-   * @private
-   * @type {Object.<string, Object.<string, number>>}
-   */
-  const _weather = {
-    [Weather.HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0.5 },
-    [Weather.EXTREMELY_HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0 },
-    [Weather.RAIN]: { [Type.FIRE]: 0.5, [Type.WATER]: 1.5 },
-    [Weather.HEAVY_RAIN]: { [Type.FIRE]: 0, [Type.WATER]: 1.5 }
-  };
+  
 
   /**
    * Performs an attack with a defender type and optional secondary defender type.
@@ -403,24 +428,6 @@ function Type() {
     return mod;
   };
 
-  /**
-   * Calculates the effectiveness of this type in a given weather condition.
-   * @method
-   * @param {Weather} weather - The weather condition to calculate the effectiveness of this type against.
-   * @throws {TypeError} Throws an error if the input weather is not an instance of the Weather function.
-   * @returns {number} The effectiveness of this type against the given weather condition. Returns 1 if the weather condition does not affect this type or if this type is not affected by weather.
-   */
-  this.attackThrough = function(weather) {
-    if (!(weather instanceof Weather))
-      throw new TypeError("Weather must in an instance of the Weather function");
-
-    if (_weather.hasOwnProperty(weather) && _weather[weather].hasOwnProperty(this)) {
-      return _weather[weather][this];
-    }
-
-    // Either the weather doesn't affect the power of moves or this type isn't affected by the weather.
-    return 1;
-  };
 
   /**
    * Returns the name of this type.
