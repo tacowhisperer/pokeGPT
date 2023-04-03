@@ -289,46 +289,51 @@ function Type() {
 
   /**
    * A mapping of effectiveness values for each type against this type in Gen I
+   * @private
+   * @type {Object.<string, Object.<string, number>>}
    */
   const _genIEff = {
-    [Type.NORMAL]: {},
-    [Type.FIRE]: {},
-    [Type.WATER]: {},
-    [Type.ELECTRIC]: {},
-    [Type.GRASS]: {},
-    [Type.ICE]: {},
-    [Type.FIGHTING]: {},
-    [Type.POISON]: {},
-    [Type.GROUND]: {},
-    [Type.FLYING]: {},
-    [Type.PSYCHIC]: {},
-    [Type.BUG]: {},
-    [Type.ROCK]: {},
-    [Type.GHOST]: {},
-    [Type.DRAGON]: {}
+    [Type.NORMAL]: { [Type.FIGHTING]: 2, [Type.GHOST]: 0 },
+    [Type.FIRE]: { [Type.FIRE]: 0.5, [Type.WATER]: 2, [Type.GRASS]: 0.5, [Type.GROUND]: 2, [Type.BUG]: 0.5, [Type.ROCK]: 2 },
+    [Type.WATER]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 2, [Type.GRASS]: 2, [Type.ICE]: 0.5 },
+    [Type.ELECTRIC]: { [Type.ELECTRIC]: 0.5, [Type.GROUND]: 2, [Type.FLYING]: 0.5 },
+    [Type.GRASS]: { [Type.FIRE]: 2, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.POISON]: 2, [Type.GROUND]: 0.5, [Type.FLYING]: 2, [Type.BUG]: 2 },
+    [Type.ICE]: { [Type.FIRE]: 2, [Type.ICE]: 0.5, [Type.FIGHTING]: 2, [Type.ROCK]: 2 },
+    [Type.FIGHTING]: { [Type.FLYING]: 2, [Type.PSYCHIC]: 2, [Type.BUG]: 0.5, [Type.ROCK]: 0.5 },
+    [Type.POISON]: { [Type.GRASS]: 0.5, [Type.FIGHTING]: 0.5, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.PSYCHIC]: 2, [Type.BUG]: 2 },
+    [Type.GROUND]: { [Type.WATER]: 2, [Type.ELECTRIC]: 0, [Type.GRASS]: 2, [Type.ICE]: 2, [Type.POISON]: 0.5, [Type.ROCK]: 0.5 },
+    [Type.FLYING]: { [Type.ELECTRIC]: 2, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.FIGHTING]: 0.5, [Type.GROUND]: 0, [Type.BUG]: 0.5, [Type.ROCK]: 2 },
+    [Type.PSYCHIC]: { [Type.FIGHTING]: 0.5, [Type.PSYCHIC]: 0.5, [Type.BUG]: 2, [Type.GHOST]: 0 },
+    [Type.BUG]: { [Type.FIRE]: 2, [Type.GRASS]: 0.5, [Type.FIGHTING]: 0.5, [Type.POISON]: 2, [Type.GROUND]: 0.5, [Type.FLYING]: 2, [Type.ROCK]: 2 },
+    [Type.ROCK]: { [Type.NORMAL]: 0.5, [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.GRASS]: 2, [Type.FIGHTING]: 2, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.FLYING]: 0.5 },
+    [Type.GHOST]: { [Type.NORMAL]: 0, [Type.FIGHTING]: 0, [Type.POISON]: 0.5, [Type.BUG]: 0.5, [Type.GHOST]: 2 },
+    [Type.DRAGON]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.DRAGON]: 2 }
   };
 
   /**
    * A mapping of effectiveness values for each type against this type in gens II-V
+   * @private
+   * @type {Object.<string, Object.<string, number>>}
    */
   const _genIItoVEff = {
-    [Type.NORMAL]: {},
-    [Type.FIRE]: {},
-    [Type.WATER]: {},
-    [Type.ELECTRIC]: {},
-    [Type.GRASS]: {},
-    [Type.ICE]: {},
-    [Type.FIGHTING]: {},
-    [Type.POISON]: {},
-    [Type.GROUND]: {},
-    [Type.FLYING]: {},
-    [Type.PSYCHIC]: {},
-    [Type.BUG]: {},
-    [Type.ROCK]: {},
-    [Type.GHOST]: {},
-    [Type.DRAGON]: {},
-    [Type.DARK]: {},
-    [Type.STEEL]: {}
+    [Type.BUG]: { [Type.FIGHTING]: 0.5, [Type.FLYING]: 2, [Type.GROUND]: 0.5, [Type.ROCK]: 2, [Type.FIRE]: 2, [Type.GRASS]: 0.5 },
+    [Type.DARK]: { [Type.FIGHTING]: 2, [Type.PSYCHIC]: 0, [Type.BUG]: 2, [Type.GHOST]: 0.5, [Type.DARK]: 0.5 },
+    [Type.DRAGON]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.GRASS]: 0.5, [Type.ICE]: 2, [Type.DRAGON]: 2 },
+    [Type.ELECTRIC]: { [Type.FLYING]: 0.5, [Type.GROUND]: 2, [Type.ELECTRIC]: 0.5, [Type.DRAGON]: 0.5, [Type.STEEL]: 0.5 },
+    [Type.FIGHTING]: { [Type.FLYING]: 2, [Type.ROCK]: 0.5, [Type.BUG]: 0.5, [Type.PSYCHIC]: 2, [Type.DARK]: 0.5 },
+    [Type.FIRE]: { [Type.ROCK]: 2, [Type.BUG]: 0.5, [Type.STEEL]: 0.5, [Type.FIRE]: 0.5, [Type.WATER]: 2, [Type.GRASS]: 0.5, [Type.ICE]: 0.5, [Type.DRAGON]: 0.5, [Type.GROUND]: 2 },
+    [Type.FLYING]: { [Type.FIGHTING]: 0.5, [Type.ROCK]: 2, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 2, [Type.ICE]: 2, [Type.GROUND]: 0 },
+    [Type.DELTA_FLYING]: { [Type.FIGHTING]: 0.5, [Type.ROCK]: 1, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 1, [Type.ICE]: 1, [Type.GROUND]: 0 },
+    [Type.GHOST]: { [Type.NORMAL]: 0, [Type.FIGHTING]: 0, [Type.POISON]: 0.5, [Type.BUG]: 0.5, [Type.GHOST]: 2, [Type.DARK]: 2 },
+    [Type.GRASS]: { [Type.FLYING]: 2, [Type.POISON]: 2, [Type.GROUND]: 0.5, [Type.BUG]: 2, [Type.FIRE]: 2, [Type.GRASS]: 0.5, [Type.WATER]: 0.5, [Type.ELECTRIC]: 0.5, [Type.ICE]: 2 },
+    [Type.GROUND]: { [Type.POISON]: 0.5, [Type.ROCK]: 2, [Type.WATER]: 2, [Type.GRASS]: 0.5, [Type.ELECTRIC]: 0, [Type.ICE]: 2 },
+    [Type.ICE]: { [Type.STEEL]: 2, [Type.FIRE]: 2, [Type.ICE]: 0.5, [Type.ROCK]: 2, [Type.FIGHTING]: 2 },
+    [Type.NORMAL]: { [Type.FIGHTING]: 2, [Type.GHOST]: 0 },
+    [Type.POISON]: { [Type.FIGHTING]: 0.5, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.BUG]: 0.5, [Type.GRASS]: 0.5, [Type.PSYCHIC]: 2 },
+    [Type.PSYCHIC]: { [Type.FIGHTING]: 0.5, [Type.PSYCHIC]: 0.5, [Type.DARK]: 2, [Type.GHOST]: 2, [Type.BUG]: 2 },
+    [Type.ROCK]: { [Type.NORMAL]: 0.5, [Type.FIGHTING]: 2, [Type.FLYING]: 0.5, [Type.POISON]: 0.5, [Type.GROUND]: 2, [Type.STEEL]: 2, [Type.FIRE]: 0.5, [Type.WATER]: 2, [Type.GRASS]: 2 },
+    [Type.STEEL]: { [Type.NORMAL]: 0.5, [Type.FIGHTING]: 2, [Type.FLYING]: 0.5, [Type.ROCK]: 0.5, [Type.BUG]: 0.5, [Type.GHOST]: 0.5, [Type.STEEL]: 0.5, [Type.FIRE]: 2, [Type.GRASS]: 0.5, [Type.ICE]: 0.5, [Type.POISON]: 0, [Type.GROUND]: 2, [Type.PSYCHIC]: 0.5, [Type.DRAGON]: 0.5, [Type.DARK]: 0.5 },
+    [Type.WATER]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.GRASS]: 2, [Type.ELECTRIC]: 2, [Type.ICE]: 0.5, [Type.STEEL]: 0.5 }
   };
 
   /**
