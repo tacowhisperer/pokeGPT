@@ -240,32 +240,26 @@ function Weather() {
    * @type {Object.<string, Object.<string, number>>}
    */
   const _powerModWeather = {
-    [Weather.HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0.5 },
-    [Weather.EXTREMELY_HARSH_SUN]: { [Type.FIRE]: 1.5, [Type.WATER]: 0 },
-    [Weather.RAIN]: { [Type.FIRE]: 0.5, [Type.WATER]: 1.5 },
-    [Weather.HEAVY_RAIN]: { [Type.FIRE]: 0, [Type.WATER]: 1.5 }
-  };
-
-  this.encompass = function(attackType) {
-    
+    [Type.FIRE]: { [Weather.HARSH_SUN]: 1.5, [Weather.EXTREMELY_HARSH_SUN]: 1.5, [Weather.RAIN]: 0.5, [Weather.HEAVY_RAIN]: 0 },
+    [Type.WATER]: { [Weather.HARSH_SUN]: 0.5, [Weather.EXTREMELY_HARSH_SUN]: 0, [Weather.RAIN]: 1.5, [Weather.HEAVY_RAIN]: 1.5 }
   };
 
   /**
-   * Calculates the effectiveness of this type in a given weather condition.
+   * Modifies the power of the incoming attack Type by an amount specified in the power mod weather object.
    * @method
-   * @param {Weather} weather - The weather condition to calculate the effectiveness of this type against.
-   * @throws {TypeError} Throws an error if the input weather is not an instance of the Weather function.
-   * @returns {number} The effectiveness of this type against the given weather condition. Returns 1 if the weather condition does not affect this type or if this type is not affected by weather.
+   * @param {Type} attackType - The Type of the incoming attack.
+   * @throws {TypeError} Throws an error if the input attack type is not an instance of the Type class.
+   * @returns {number} The effectiveness of the attack type against the current weather, if any (1 if none).
    */
-  this.attackThrough = function(weather) {
-    if (!(weather instanceof Weather))
-      throw new TypeError("Weather must in an instance of the Weather function");
+  this.encompass = function(attackType) {
+    if (!(attackType instanceof Type))
+      throw new TypeError(`Attack type must be an instance of Type.`);
 
-    if (_weather.hasOwnProperty(weather) && _weather[weather].hasOwnProperty(this)) {
-      return _weather[weather][this];
+    if (_powerModWeather.hasOwnProperty(attackType) && _powerModWeather[attackType].hasOwnProperty(this)) {
+      return _powerModWeather[attackType][this];
     }
 
-    // Either the weather doesn't affect the power of moves or this type isn't affected by the weather.
+    // Either the attack Type isn't affected by weather or this weather doesn't affect the attack Type.
     return 1;
   };
 
