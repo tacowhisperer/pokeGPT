@@ -392,8 +392,6 @@ function Type() {
     [Type.WATER]: { [Type.FIRE]: 0.5, [Type.WATER]: 0.5, [Type.GRASS]: 2, [Type.ELECTRIC]: 2, [Type.ICE]: 0.5, [Type.STEEL]: 0.5 }
   };
 
-  
-
   /**
    * Performs an attack with a defender type and optional secondary defender type.
    * Calculates the attack modifier based on the effectiveness of the attack type against the defender type(s).
@@ -410,13 +408,24 @@ function Type() {
     if (!(fDefenderType instanceof Type) || !(sDefenderType instanceof Type))
       throw new TypeError("Defender types must be instances of the Type function");
 
-    let mod = 1;
-    if (_genVIEff.hasOwnProperty(fDefenderType) && _genVIEff[fDefenderType].hasOwnProperty(this)) {
-      mod *= _genVIEff[fDefenderType][this];
+    // Determine which generation the attack is taking place and use the appropriate type chart for damage modifier.
+    let eff = {};
+    if (gen.match('I')) {
+      eff = _genIEff;
+    } else if (gen.match('II-V')) {
+      eff = _genIItoVEff;
+    } else {
+      eff = _genVIEff;
     }
 
-    if (_genVIEff.hasOwnProperty(sDefenderType) && _genVIEff[sDefenderType].hasOwnProperty(this)) {
-      mod *= _genVIEff[sDefenderType][this];
+    // Damage modifiers are multiplicative of each type involved in the attack
+    let mod = 1;
+    if (eff.hasOwnProperty(fDefenderType) && eff[fDefenderType].hasOwnProperty(this)) {
+      mod *= eff[fDefenderType][this];
+    }
+
+    if (eff.hasOwnProperty(sDefenderType) && eff[sDefenderType].hasOwnProperty(this)) {
+      mod *= eff[sDefenderType][this];
     }
 
     return mod;
