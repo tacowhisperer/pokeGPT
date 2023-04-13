@@ -263,6 +263,22 @@ function Weather() {
     return 1;
   };
 
+  /**
+   * A mapping of weather behaviors given a generation.
+   */
+  const _genBehavior = {
+    'II': {
+
+    },
+    'III': {},
+    'IV': {},
+    'V': {},
+    'VI': {},
+    'VII': {},
+    'VIII': {},
+    'IX': {}
+  }
+
   this.toString = function() {
     return `${_id}`;
   };
